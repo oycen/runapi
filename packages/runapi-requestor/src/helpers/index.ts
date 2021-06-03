@@ -46,6 +46,6 @@ export function promiseToAbortablePromise<P = any>(promise: Promise<P>) {
 }
 
 export function getApplicationClient() {
-  if (wx?.getSystemInfoSync()) return "wechatminiapp";
-  return "browser";
+  if (window) return "browser";
+  return "wechatminiapp";
 }
