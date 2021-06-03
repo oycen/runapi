@@ -1,7 +1,7 @@
 import AbortablePromise from "promise-abortable";
 import { Engine } from "../engine";
 import { Interceptor } from "../interceptor";
-import { FetchEngine } from "src/engine/impl/fetch-engine";
+import { FetchEngine } from "../engine/impl/fetch-engine";
 import { WxmpEngine } from "../engine/impl/wxmp-engine";
 import { RequestContext, RequestMethod } from "../context/request-context";
 import { ResponseContext } from "../context/response-context";
