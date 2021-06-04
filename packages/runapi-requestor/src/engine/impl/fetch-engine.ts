@@ -3,7 +3,7 @@ import { RequestContext } from "../../context/request-context";
 
 export class FetchEngine extends Engine<Response> {
   doRequest({ queryUrl, method, headers, credentials, body }: RequestContext) {
-    return fetch(queryUrl, {
+    return window.fetch(queryUrl, {
       method,
       headers,
       credentials: typeof credentials === "boolean" ? "same-origin" : credentials ?? "same-origin",

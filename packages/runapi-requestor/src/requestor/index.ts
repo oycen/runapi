@@ -90,10 +90,7 @@ export class Requestor<Response = any, Environment extends string = any> {
     this.engine = engine;
     this.requestEnv = requestEnv;
 
-    const contextTap = requestContext?.contextTap;
-    if (requestContext) requestContext.contextTap = undefined;
     if (requestContext) this.requestContext = RequestContext.merge(this.requestContext, requestContext);
-    this.requestContext.setContextTap(contextTap);
   }
 
   /** 发起请求 */

@@ -28,6 +28,9 @@
   "bugs": {
     "url": "https://github.com/oycen/runapi/issues"
   },
+  "peerDependencies": {
+    "reflect-metadata": "^0.1.13"
+  },
   "devDependencies": {
     "@runapi/requestor": "^10.0.2",
     "jest": "^26.6.3",

@@ -12,8 +12,22 @@ export function createRequestContext() {
 }
 
 export class RequestContext {
-  static merge(...sources: any[]) {
-    return plainToClass(RequestContext, Object.assign({}, ...sources));
+  static merge(target: RequestContext, source?: RequestContext) {
+    return new RequestContext()
+      .setBaseUrl(source?.baseUrl ?? target.baseUrl)
+      .setBasePath(source?.basePath ?? target.basePath)
+      .setPath(source?.path ?? target.path)
+      .setMethod(source?.method ?? target.method)
+      .setHeaders(source?.headers ?? target.headers)
+      .setCredentials(source?.credentials ?? target.credentials)
+      .setParams(target.params, source?.params)
+      .setQuery(target.query, source?.query)
+      .setBody(target.body, source?.body)
+      .setContextTap(source?.contextTap ?? target.contextTap)
+      .setMockTemplate(source?.mockTemplate ?? target.mockTemplate)
+      .setRepeatRequestAbort(source?.repeatRequestAbort ?? target.repeatRequestAbort)
+      .setRepeatRequestAwait(source?.repeatRequestAwait ?? target.repeatRequestAwait)
+      .setOthers(source?.baseUrl ?? target.baseUrl);
   }
 
   /** 请求基础URL */
