@@ -138,7 +138,7 @@ export class Requestor<Response = any, Environment extends string = any> {
         const response = await request;
         resContext = new ResponseContext<Result, Response>(reqContext, response);
 
-        if (resContextTap) resContextTap = resContextTap(resContext);
+        if (resContextTap) resContext = resContextTap(resContext);
       }
 
       for await (const responseIntercept of responseIntercepts) {

@@ -1,6 +1,8 @@
 node_modules
 lib
 
+exp
+
 package-lock.json
 yarn.lock
 npm-debug.log*

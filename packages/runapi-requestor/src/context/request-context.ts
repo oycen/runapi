@@ -61,7 +61,7 @@ export class RequestContext {
   body?: Record<string, any>;
 
   /** 请求上下文与响应上下文监听回调函数 */
-  contextTap?: (requestContext: RequestContext) => (responseContext: ResponseContext<any, any>) => void;
+  contextTap?: (requestContext: RequestContext) => (responseContext: ResponseContext<any, any>) => ResponseContext<any, any>;
 
   /**
    * 模拟数据模板
