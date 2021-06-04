@@ -1,4 +1,3 @@
-import { plainToClass } from "class-transformer";
 import { buildUrl, combineUrl, compilePath, objectToQueryString } from "../helpers";
 import { Requestor } from "../requestor";
 import { ResponseContext } from "./response-context";
@@ -6,6 +5,16 @@ import { ResponseContext } from "./response-context";
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type RequestCredentials = "include" | "omit" | "same-origin" | boolean;
+
+export type RequestContextTap<T> = (requestContext: RequestContext) => T;
+export type ResponseContextTap<T> = (responseContext: ResponseContext<any, any>) => T;
+
+export type ContextTap =
+  | RequestContextTap<void>
+  | RequestContextTap<ResponseContextTap<void>>
+  | RequestContextTap<ResponseContextTap<Promise<void>>>
+  | RequestContextTap<Promise<ResponseContextTap<void>>>
+  | RequestContextTap<Promise<ResponseContextTap<Promise<void>>>>;
 
 export function createRequestContext() {
   return new RequestContext();
@@ -61,7 +70,7 @@ export class RequestContext {
   body?: Record<string, any>;
 
   /** 请求上下文与响应上下文监听回调函数 */
-  contextTap?: (requestContext: RequestContext) => (responseContext: ResponseContext<any, any>) => ResponseContext<any, any>;
+  contextTap?: ContextTap;
 
   /**
    * 模拟数据模板

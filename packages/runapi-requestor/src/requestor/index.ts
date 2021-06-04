@@ -95,9 +95,9 @@ export class Requestor<Response = any, Environment extends string = any> {
 
   /** 发起请求 */
   async request<Result = unknown>(requestContext?: RequestContext) {
-    let reqContext: RequestContext | undefined;
-    let resContext: ResponseContext | undefined;
-    let request: AbortablePromise<Response> | undefined;
+    let reqContext;
+    let resContext;
+    let request;
 
     try {
       reqContext = RequestContext.merge(this.requestContext, requestContext);
@@ -130,15 +130,16 @@ export class Requestor<Response = any, Environment extends string = any> {
           }
         }
 
+        let reqContextTap = reqContext.contextTap;
         let resContextTap;
-        if (reqContext.contextTap) resContextTap = reqContext.contextTap(reqContext);
+        if (reqContextTap) resContextTap = await reqContextTap(reqContext);
 
         this.requestPool.set([reqContext.method, reqContext.queryUrl], request);
 
         const response = await request;
         resContext = new ResponseContext<Result, Response>(reqContext, response);
 
-        if (resContextTap) resContext = resContextTap(resContext);
+        if (resContextTap) await resContextTap(resContext);
       }
 
       for await (const responseIntercept of responseIntercepts) {
