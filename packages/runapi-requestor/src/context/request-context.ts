@@ -8,7 +8,6 @@ export type RequestCredentials = "include" | "omit" | "same-origin" | boolean;
 
 export type RequestContextTap<T> = (requestContext: RequestContext) => T;
 export type ResponseContextTap<T> = (responseContext: ResponseContext<any, any>) => T;
-
 export type ContextTap =
   | RequestContextTap<void>
   | RequestContextTap<ResponseContextTap<void>>
@@ -16,29 +15,13 @@ export type ContextTap =
   | RequestContextTap<Promise<ResponseContextTap<void>>>
   | RequestContextTap<Promise<ResponseContextTap<Promise<void>>>>;
 
+export type ModelConstructor<T = any> = { new (...args: any[]): T };
+
 export function createRequestContext() {
   return new RequestContext();
 }
 
 export class RequestContext {
-  static merge(target: RequestContext, source?: RequestContext) {
-    return new RequestContext()
-      .setBaseUrl(source?.baseUrl ?? target.baseUrl)
-      .setBasePath(source?.basePath ?? target.basePath)
-      .setPath(source?.path ?? target.path)
-      .setMethod(source?.method ?? target.method)
-      .setHeaders(source?.headers ?? target.headers)
-      .setCredentials(source?.credentials ?? target.credentials)
-      .setParams(target.params, source?.params)
-      .setQuery(target.query, source?.query)
-      .setBody(target.body, source?.body)
-      .setContextTap(source?.contextTap ?? target.contextTap)
-      .setMockTemplate(source?.mockTemplate ?? target.mockTemplate)
-      .setRepeatRequestAbort(source?.repeatRequestAbort ?? target.repeatRequestAbort)
-      .setRepeatRequestAwait(source?.repeatRequestAwait ?? target.repeatRequestAwait)
-      .setOthers(source?.baseUrl ?? target.baseUrl);
-  }
-
   /** 请求基础URL */
   baseUrl?: string;
 
@@ -76,7 +59,10 @@ export class RequestContext {
    * 模拟数据模板
    * @see https://github.com/nuysoft/Mock/wiki/Mock.mock()
    */
-  mockTemplate?: any;
+  mock?: any;
+
+  /** 响应对象模型 */
+  model?: ModelConstructor;
 
   /** 是否取消处理中的重复请求 */
   repeatRequestAbort?: boolean;
@@ -163,8 +149,14 @@ export class RequestContext {
   }
 
   /** 设置模拟数据模板 */
-  setMockTemplate(mockTemplate: RequestContext["mockTemplate"]) {
-    this.mockTemplate = mockTemplate;
+  setMock(mock: RequestContext["mock"]) {
+    this.mock = mock;
+    return this;
+  }
+
+  /** 设置响应对象模型 */
+  setModel(model: RequestContext["model"]) {
+    this.model = model;
     return this;
   }
 
@@ -189,5 +181,24 @@ export class RequestContext {
   /** 发送请求 */
   send(requestor: Requestor) {
     return requestor.request(this);
+  }
+
+  merge(source: RequestContext) {
+    return new RequestContext()
+      .setBaseUrl(source.baseUrl ?? this.baseUrl)
+      .setBasePath(source.basePath ?? this.basePath)
+      .setPath(source.path ?? this.path)
+      .setMethod(source.method ?? this.method)
+      .setHeaders(source.headers ?? this.headers)
+      .setCredentials(source.credentials ?? this.credentials)
+      .setParams(this.params, source.params)
+      .setQuery(this.query, source.query)
+      .setBody(this.body, source.body)
+      .setContextTap(source.contextTap ?? this.contextTap)
+      .setMock(source.mock ?? this.mock)
+      .setModel(source.model ?? this.model)
+      .setRepeatRequestAbort(source.repeatRequestAbort ?? this.repeatRequestAbort)
+      .setRepeatRequestAwait(source.repeatRequestAwait ?? this.repeatRequestAwait)
+      .setOthers(source.others ?? this.others);
   }
 }

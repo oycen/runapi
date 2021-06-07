@@ -21,10 +21,10 @@ export function Http(
 
     const baseUrl = Reflect.getMetadata(baseUrlMetadataKey, target) as RequestContext["baseUrl"] | undefined;
     const headers = Reflect.getMetadata(headersMetadataKey, target) as RequestContext["headers"] | undefined;
-    const mockTemplate = Reflect.getMetadata(mockMetadataKey, target) as RequestContext["mockTemplate"] | undefined;
+    const mock = Reflect.getMetadata(mockMetadataKey, target) as RequestContext["mock"] | undefined;
+    const model = Reflect.getMetadata(transformMetadataKey, target) as ModelConstructor | undefined;
     const repeatRequestAbort = Reflect.getMetadata(repeatRequestAbortMetadataKey, target) as RequestContext["repeatRequestAbort"] | undefined;
     const repeatRequestAwait = Reflect.getMetadata(repeatRequestAwaitMetadataKey, target) as RequestContext["repeatRequestAwait"] | undefined;
-    const model = Reflect.getMetadata(transformMetadataKey, target) as ModelConstructor | undefined;
     const interceptors = Reflect.getMetadata(interceptorsMetadataKey, target) as Interceptor[] | undefined;
 
     const paramsArgIndex = Reflect.getMetadata(paramsMetadataKey, target);
@@ -68,12 +68,11 @@ export function Http(
             .setParams(data?.params ?? {}, params ?? {})
             .setQuery(data?.query ?? {}, query ?? {})
             .setBody(data?.body ?? {}, body ?? {})
-            .setMockTemplate(mockTemplate)
+            .setMock(mock)
+            .setModel(model)
             .setRepeatRequestAbort(repeatRequestAbort)
             .setRepeatRequestAwait(repeatRequestAwait)
             .send(requestor);
-
-          if (model) responseContext.transform(model);
 
           resolve(responseContext);
         } catch (error) {

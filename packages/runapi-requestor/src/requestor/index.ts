@@ -90,30 +90,36 @@ export class Requestor<Response = any, Environment extends string = any> {
     this.engine = engine;
     this.requestEnv = requestEnv;
 
-    if (requestContext) this.requestContext = RequestContext.merge(this.requestContext, requestContext);
+    if (requestContext) this.requestContext = this.requestContext.merge(requestContext);
   }
 
   /** 发起请求 */
-  async request<Result = unknown>(requestContext?: RequestContext) {
+  async request<Result = unknown>(requestContext: RequestContext) {
     let reqContext;
     let resContext;
+    let reqContextTap;
+    let resContextTap;
     let request;
 
     try {
-      reqContext = RequestContext.merge(this.requestContext, requestContext);
+      reqContext = this.requestContext.merge(requestContext);
 
       const [requestIntercepts, responseIntercepts] = [
         this.interceptors.map(({ requestIntercept }) => requestIntercept),
         this.interceptors.map(({ responseIntercept }) => responseIntercept),
       ];
 
-      for await (const requestIntercept of requestIntercepts) {
-        reqContext = await requestIntercept(reqContext);
-      }
-
-      if (reqContext.mockTemplate) {
+      if (reqContext.mock) {
         resContext = new ResponseContext<Result, Response>(reqContext).mock();
+        resContext.transform();
       } else {
+        reqContextTap = reqContext.contextTap;
+        if (reqContextTap) resContextTap = await reqContextTap(reqContext);
+
+        for await (const requestIntercept of requestIntercepts) {
+          reqContext = await requestIntercept(reqContext);
+        }
+
         request = promiseToAbortablePromise(this.engine.doRequest(reqContext));
 
         const requesting = this.requestPool.get([reqContext.method, reqContext.queryUrl]);
@@ -130,14 +136,11 @@ export class Requestor<Response = any, Environment extends string = any> {
           }
         }
 
-        let reqContextTap = reqContext.contextTap;
-        let resContextTap;
-        if (reqContextTap) resContextTap = await reqContextTap(reqContext);
-
         this.requestPool.set([reqContext.method, reqContext.queryUrl], request);
 
         const response = await request;
         resContext = new ResponseContext<Result, Response>(reqContext, response);
+        resContext.transform();
 
         if (resContextTap) await resContextTap(resContext);
       }

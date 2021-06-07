@@ -2,8 +2,8 @@ import { RequestContext } from "@runapi/requestor";
 
 export const mockMetadataKey = Symbol("mock");
 
-export function Mock(mockTemplate: RequestContext["mockTemplate"]): MethodDecorator {
+export function Mock(mock: RequestContext["mock"]): MethodDecorator {
   return (target) => {
-    Reflect.defineMetadata(mockMetadataKey, mockTemplate, target);
+    Reflect.defineMetadata(mockMetadataKey, mock, target);
   };
 }

@@ -1,8 +1,6 @@
 import Mock from "mockjs";
-import { ClassTransformOptions, plainToClass } from "class-transformer";
+import { plainToClass } from "class-transformer";
 import { RequestContext } from "./request-context";
-
-export type ModelConstructor<T = any> = { new (...args: any[]): T };
 
 export class ResponseContext<Result = unknown, Response = any> {
   /** 请求上下文 */
@@ -20,20 +18,17 @@ export class ResponseContext<Result = unknown, Response = any> {
   /** 响应数据结果 */
   result?: Result;
 
-  /** 响应数据不合法错误集 */
-  resultErrors?: any;
-
   constructor(requestContext: RequestContext, response?: Response) {
     this.requestContext = requestContext;
     this.response = response;
   }
 
   /** 模拟响应数据 */
-  mock(status: ResponseContext["status"] = 200, statusText: ResponseContext["statusText"] = "mock succeeded") {
-    if (this.requestContext.mockTemplate) {
-      const mockData = Mock.mock(this.requestContext.mockTemplate);
-      this.status = status;
-      this.statusText = statusText;
+  mock() {
+    if (this.requestContext.mock) {
+      const mockData = Mock.mock(this.requestContext.mock);
+      this.status = 200;
+      this.statusText = "mock succeeded";
       this.result = mockData;
     }
     return this;
@@ -43,9 +38,11 @@ export class ResponseContext<Result = unknown, Response = any> {
    * 转换数据，从普通对象(plain object)转换为类实例对象(class object)
    * @see https://github.com/typestack/class-transformer
    */
-  transform(model: ModelConstructor, transformOptions?: ClassTransformOptions) {
-    const result = plainToClass(model, this.result, transformOptions);
-    this.result = result;
+  transform() {
+    if (this.requestContext.model) {
+      const result = plainToClass(this.requestContext.model, this.result);
+      this.result = result;
+    }
     return this;
   }
 }
