@@ -17,8 +17,68 @@ export type ContextTap =
 
 export type ModelConstructor<T = any> = { new (...args: any[]): T };
 
-export function createRequestContext() {
-  return new RequestContext();
+export function createRequestContext(requestContextPlain?: RequestContextPlain) {
+  return new RequestContext()
+    .setBaseUrl(requestContextPlain?.baseUrl)
+    .setBasePath(requestContextPlain?.basePath)
+    .setPath(requestContextPlain?.path)
+    .setMethod(requestContextPlain?.method ?? "GET")
+    .setHeaders(requestContextPlain?.headers)
+    .setCredentials(requestContextPlain?.credentials)
+    .setParams(requestContextPlain?.params)
+    .setQuery(requestContextPlain?.query)
+    .setBody(requestContextPlain?.body)
+    .setMock(requestContextPlain?.mock)
+    .setModel(requestContextPlain?.model)
+    .setOthers(requestContextPlain?.others)
+    .setContextTap(requestContextPlain?.contextTap);
+}
+
+export interface RequestContextPlain {
+  /** 请求基础URL */
+  baseUrl?: string;
+
+  /** 请求基础路径 */
+  basePath?: string;
+
+  /** 请求路径 */
+  path?: string;
+
+  /** 请求方法 */
+  method?: RequestMethod;
+
+  /** 请求头 */
+  headers?: Record<string, string>;
+
+  /**
+   * 是否允许携带跨域cookies
+   * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Request/credentials
+   */
+  credentials?: RequestCredentials;
+
+  /** 请求路径参数 */
+  params?: Record<string, any>;
+
+  /** 请求查询参数 */
+  query?: Record<string, any>;
+
+  /** 请求体参数 */
+  body?: Record<string, any>;
+
+  /**
+   * 模拟数据模板
+   * @see https://github.com/nuysoft/Mock/wiki/Mock.mock()
+   */
+  mock?: any;
+
+  /** 响应对象模型 */
+  model?: ModelConstructor;
+
+  /** 需要传递给引擎的其他参数 */
+  others?: any;
+
+  /** 请求上下文与响应上下文监听回调函数 */
+  contextTap?: ContextTap;
 }
 
 export class RequestContext {
@@ -52,9 +112,6 @@ export class RequestContext {
   /** 请求体参数 */
   body?: Record<string, any>;
 
-  /** 请求上下文与响应上下文监听回调函数 */
-  contextTap?: ContextTap;
-
   /**
    * 模拟数据模板
    * @see https://github.com/nuysoft/Mock/wiki/Mock.mock()
@@ -66,6 +123,9 @@ export class RequestContext {
 
   /** 需要传递给引擎的其他参数 */
   others?: any;
+
+  /** 请求上下文与响应上下文监听回调函数 */
+  contextTap?: ContextTap;
 
   /** 请求完整路径 */
   get fullpath() {
@@ -136,12 +196,6 @@ export class RequestContext {
     return this;
   }
 
-  /** 设置请求上下文与响应上下文监听 */
-  setContextTap(contextTap: RequestContext["contextTap"]) {
-    this.contextTap = contextTap;
-    return this;
-  }
-
   /** 设置模拟数据模板 */
   setMock(mock: RequestContext["mock"]) {
     this.mock = mock;
@@ -157,6 +211,12 @@ export class RequestContext {
   /** 设置需要传递给引擎的其他参数 */
   setOthers(others: RequestContext["others"]) {
     this.others = others;
+    return this;
+  }
+
+  /** 设置请求上下文与响应上下文监听 */
+  setContextTap(contextTap: RequestContext["contextTap"]) {
+    this.contextTap = contextTap;
     return this;
   }
 
@@ -176,9 +236,9 @@ export class RequestContext {
       .setParams(this.params, source.params)
       .setQuery(this.query, source.query)
       .setBody(this.body, source.body)
-      .setContextTap(source.contextTap ?? this.contextTap)
       .setMock(source.mock ?? this.mock)
       .setModel(source.model ?? this.model)
-      .setOthers(source.others ?? this.others);
+      .setOthers(source.others ?? this.others)
+      .setContextTap(source.contextTap ?? this.contextTap);
   }
 }

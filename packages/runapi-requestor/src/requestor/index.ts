@@ -56,9 +56,6 @@ export class Requestor<Response = any, Environment extends string = any> {
     HOSTNAME_HYPHEN_SUFFIX: splitHostnameByHyphen(window.location.hostname)[1],
   };
 
-  /** 请求实例工厂 */
-  static readonly factory = { createRequestor, createFetchRequestor, createWxmpRequestor, createAutoAdaptRequestor };
-
   /** 获取环境变量 */
   static processenv<T = string>(name: string[]) {
     return name
