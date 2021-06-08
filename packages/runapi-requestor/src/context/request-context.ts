@@ -167,8 +167,8 @@ export class RequestContext {
   }
 
   /** 设置请求头 */
-  setHeaders(...headers: RequestContext["headers"][]) {
-    this.headers = Object.assign({}, ...headers);
+  setHeaders(headers: RequestContext["headers"]) {
+    this.headers = headers;
     return this;
   }
 
@@ -179,20 +179,20 @@ export class RequestContext {
   }
 
   /** 设置请求路径参数 */
-  setParams(...params: RequestContext["params"][]) {
-    this.params = Object.assign({}, ...params);
+  setParams(params: RequestContext["params"]) {
+    this.params = params;
     return this;
   }
 
   /** 设置请求查询参数 */
-  setQuery(...query: RequestContext["query"][]) {
-    this.query = Object.assign({}, ...query);
+  setQuery(query: RequestContext["query"]) {
+    this.query = query;
     return this;
   }
 
   /** 设置请求体参数 */
-  setBody(...body: RequestContext["body"][]) {
-    this.body = Object.assign({}, ...body);
+  setBody(body: RequestContext["body"]) {
+    this.body = body;
     return this;
   }
 
@@ -231,11 +231,11 @@ export class RequestContext {
       .setBasePath(source.basePath ?? this.basePath)
       .setPath(source.path ?? this.path)
       .setMethod(source.method ?? this.method)
-      .setHeaders(source.headers ?? this.headers)
+      .setHeaders(Object.assign({}, this.headers, source.headers))
       .setCredentials(source.credentials ?? this.credentials)
-      .setParams(this.params, source.params)
-      .setQuery(this.query, source.query)
-      .setBody(this.body, source.body)
+      .setParams(Object.assign({}, this.params, source.params))
+      .setQuery(Object.assign({}, this.query, source.query))
+      .setBody(Object.assign({}, this.body, source.body))
       .setMock(source.mock ?? this.mock)
       .setModel(source.model ?? this.model)
       .setOthers(source.others ?? this.others)
