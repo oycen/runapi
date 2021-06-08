@@ -35,10 +35,10 @@ export class ResponseContext<Result = unknown, Response = any> {
   }
 
   /**
-   * 转换数据，从普通对象(plain object)转换为类实例对象(class object)
+   * 转换为数据模型，从普通对象(plain object)转换为类实例对象(class object)
    * @see https://github.com/typestack/class-transformer
    */
-  transform() {
+  model() {
     if (this.requestContext.model) {
       const result = plainToClass(this.requestContext.model, this.result);
       this.result = result;

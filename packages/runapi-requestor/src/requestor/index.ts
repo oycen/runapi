@@ -122,13 +122,13 @@ export class Requestor<Response = any, Environment extends string = any> {
         resContext = new ResponseContext<Result, Response>(reqContext, response);
       }
 
-      resContext.transform();
-
       if (resContextTap) await resContextTap(resContext);
 
       for await (const responseIntercept of responseIntercepts) {
         resContext = await responseIntercept(resContext);
       }
+
+      resContext.model();
 
       return resContext;
     } catch (error) {

@@ -1,4 +1,4 @@
-import { Requestor, RequestContext, ModelConstructor, Interceptor } from "@runapi/requestor";
+import { Requestor, RequestContext, ModelConstructor, Interceptor, createRequestContext } from "@runapi/requestor";
 import { serviceMetadataKey } from "./service-decorator";
 import { baseUrlMetadataKey } from "./base-url-decorator";
 import { headersMetadataKey } from "./headers-decorator";
@@ -6,7 +6,7 @@ import { paramsMetadataKey } from "./params-decorator";
 import { queryMetadataKey } from "./query-decorator";
 import { bodyMetadataKey } from "./body-decorator";
 import { mockMetadataKey } from "./mock-decorator";
-import { transformMetadataKey } from "./transform-decorator";
+import { modelMetadataKey } from "./model-decorator";
 import { interceptorsMetadataKey } from "./interceptors-decorator";
 
 export function Http(
@@ -20,7 +20,7 @@ export function Http(
     const baseUrl = Reflect.getMetadata(baseUrlMetadataKey, target) as RequestContext["baseUrl"] | undefined;
     const headers = Reflect.getMetadata(headersMetadataKey, target) as RequestContext["headers"] | undefined;
     const mock = Reflect.getMetadata(mockMetadataKey, target) as RequestContext["mock"] | undefined;
-    const model = Reflect.getMetadata(transformMetadataKey, target) as ModelConstructor | undefined;
+    const model = Reflect.getMetadata(modelMetadataKey, target) as ModelConstructor | undefined;
     const interceptors = Reflect.getMetadata(interceptorsMetadataKey, target) as Interceptor[] | undefined;
 
     const paramsArgIndex = Reflect.getMetadata(paramsMetadataKey, target);
@@ -56,16 +56,19 @@ export function Http(
         let responseContext;
 
         try {
-          responseContext = await new RequestContext()
-            .setBaseUrl(baseUrl ?? requestor.requestContext.baseUrl)
-            .setMethod(methods ?? "GET")
-            .setHeaders(requestor.requestContext.headers ?? {}, headers ?? {})
-            .setPath(path)
-            .setParams(data?.params ?? {}, params ?? {})
-            .setQuery(data?.query ?? {}, query ?? {})
-            .setBody(data?.body ?? {}, body ?? {})
-            .setMock(mock)
-            .setModel(model)
+          await requestor.requestContext
+            .merge(
+              createRequestContext()
+                .setBaseUrl(baseUrl)
+                .setMethod(methods ?? "GET")
+                .setHeaders(headers)
+                .setPath(path)
+                .setParams(params)
+                .setQuery(query)
+                .setBody(body)
+                .setMock(mock)
+                .setModel(model)
+            )
             .send(requestor);
 
           resolve(responseContext);

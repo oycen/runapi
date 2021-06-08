@@ -16,7 +16,7 @@ export * from "./decorators/put-decorator";
 export * from "./decorators/patch-decorator";
 export * from "./decorators/delete-decorator";
 export * from "./decorators/mock-decorator";
-export * from "./decorators/transform-decorator";
+export * from "./decorators/model-decorator";
 export * from "./decorators/interceptors-decorator";
 
 export * from "./scanner/service-scanner";
