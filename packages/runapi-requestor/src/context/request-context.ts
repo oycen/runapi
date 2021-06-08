@@ -225,6 +225,7 @@ export class RequestContext {
     return requestor.request(this);
   }
 
+  /** 合并请求上下文 */
   merge(source: RequestContext) {
     return new RequestContext()
       .setBaseUrl(source.baseUrl ?? this.baseUrl)
