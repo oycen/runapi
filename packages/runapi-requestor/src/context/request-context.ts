@@ -64,12 +64,6 @@ export class RequestContext {
   /** 响应对象模型 */
   model?: ModelConstructor;
 
-  /** 是否取消处理中的重复请求 */
-  repeatRequestAbort?: boolean;
-
-  /** 是否等待处理中的重复请求 */
-  repeatRequestAwait?: boolean;
-
   /** 需要传递给引擎的其他参数 */
   others?: any;
 
@@ -160,18 +154,6 @@ export class RequestContext {
     return this;
   }
 
-  /** 设置是否取消处理中的重复请求 */
-  setRepeatRequestAbort(repeatRequestAbort: RequestContext["repeatRequestAbort"]) {
-    this.repeatRequestAbort = repeatRequestAbort;
-    return this;
-  }
-
-  /** 设置是否等待处理中的重复请求 */
-  setRepeatRequestAwait(repeatRequestAwait: RequestContext["repeatRequestAwait"]) {
-    this.repeatRequestAwait = repeatRequestAwait;
-    return this;
-  }
-
   /** 设置需要传递给引擎的其他参数 */
   setOthers(others: RequestContext["others"]) {
     this.others = others;
@@ -197,8 +179,6 @@ export class RequestContext {
       .setContextTap(source.contextTap ?? this.contextTap)
       .setMock(source.mock ?? this.mock)
       .setModel(source.model ?? this.model)
-      .setRepeatRequestAbort(source.repeatRequestAbort ?? this.repeatRequestAbort)
-      .setRepeatRequestAwait(source.repeatRequestAwait ?? this.repeatRequestAwait)
       .setOthers(source.others ?? this.others);
   }
 }

@@ -31,12 +31,10 @@
   "dependencies": {
     "class-transformer": "^0.4.0",
     "mockjs": "^1.1.0",
-    "path-to-regexp": "^6.2.0",
-    "promise-abortable": "^1.2.6"
+    "path-to-regexp": "^6.2.0"
   },
   "devDependencies": {
     "@types/mockjs": "^1.0.3",
-    "@types/promise-abortable": "^1.2.0",
     "@types/wechat-miniprogram": "^3.3.0",
     "jest": "^26.6.3",
     "typescript": "^4.2.3"

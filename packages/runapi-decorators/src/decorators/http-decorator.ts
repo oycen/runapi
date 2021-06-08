@@ -8,8 +8,6 @@ import { bodyMetadataKey } from "./body-decorator";
 import { mockMetadataKey } from "./mock-decorator";
 import { transformMetadataKey } from "./transform-decorator";
 import { interceptorsMetadataKey } from "./interceptors-decorator";
-import { repeatRequestAbortMetadataKey } from "./repeat-request-abort-decorator";
-import { repeatRequestAwaitMetadataKey } from "./repeat-request-await-decorator";
 
 export function Http(
   methods?: RequestContext["method"],
@@ -23,8 +21,6 @@ export function Http(
     const headers = Reflect.getMetadata(headersMetadataKey, target) as RequestContext["headers"] | undefined;
     const mock = Reflect.getMetadata(mockMetadataKey, target) as RequestContext["mock"] | undefined;
     const model = Reflect.getMetadata(transformMetadataKey, target) as ModelConstructor | undefined;
-    const repeatRequestAbort = Reflect.getMetadata(repeatRequestAbortMetadataKey, target) as RequestContext["repeatRequestAbort"] | undefined;
-    const repeatRequestAwait = Reflect.getMetadata(repeatRequestAwaitMetadataKey, target) as RequestContext["repeatRequestAwait"] | undefined;
     const interceptors = Reflect.getMetadata(interceptorsMetadataKey, target) as Interceptor[] | undefined;
 
     const paramsArgIndex = Reflect.getMetadata(paramsMetadataKey, target);
@@ -70,8 +66,6 @@ export function Http(
             .setBody(data?.body ?? {}, body ?? {})
             .setMock(mock)
             .setModel(model)
-            .setRepeatRequestAbort(repeatRequestAbort)
-            .setRepeatRequestAwait(repeatRequestAwait)
             .send(requestor);
 
           resolve(responseContext);

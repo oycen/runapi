@@ -1,5 +1,4 @@
 import { compile } from "path-to-regexp";
-import AbortablePromise from "promise-abortable";
 
 export function isAbsoluteUrl(url: string) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
@@ -36,13 +35,6 @@ export function objectToQueryString(object?: Record<string, any>) {
     .map((key) => "".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(object[key])))
     .join("&");
   return qs && `?${qs}`;
-}
-
-export function promiseToAbortablePromise<P = any>(promise: Promise<P>) {
-  return new AbortablePromise<P>((resolve, reject, signal) => {
-    signal.onabort = reject;
-    promise.then(resolve).catch(reject);
-  });
 }
 
 export function getApplicationClient() {

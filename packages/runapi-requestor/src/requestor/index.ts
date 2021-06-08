@@ -1,11 +1,10 @@
-import AbortablePromise from "promise-abortable";
 import { Engine } from "../engine";
 import { Interceptor } from "../interceptor";
 import { FetchEngine } from "../engine/impl/fetch-engine";
 import { WxmpEngine } from "../engine/impl/wxmp-engine";
-import { RequestContext, RequestMethod } from "../context/request-context";
+import { RequestContext } from "../context/request-context";
 import { ResponseContext } from "../context/response-context";
-import { splitHostnameByHyphen, isDomainUrl, isLocalUrl, promiseToAbortablePromise, getApplicationClient } from "../helpers";
+import { splitHostnameByHyphen, isDomainUrl, isLocalUrl, getApplicationClient } from "../helpers";
 
 export type RequestEnv<Environment extends string> = Record<Environment, string | undefined>;
 export type RequestClient = "browser" | "wechatminiapp";
@@ -84,7 +83,7 @@ export class Requestor<Response = any, Environment extends string = any> {
   readonly requestContext: RequestContext = new RequestContext();
 
   /** 请求池 */
-  readonly requestPool: Map<[RequestMethod, string], AbortablePromise<Response>> = new Map();
+  readonly requestPool: Map<string, Promise<Response>> = new Map();
 
   constructor(engine: Engine<Response>, requestContext?: RequestContext, requestEnv?: RequestEnv<Environment>) {
     this.engine = engine;
@@ -109,41 +108,26 @@ export class Requestor<Response = any, Environment extends string = any> {
         this.interceptors.map(({ responseIntercept }) => responseIntercept),
       ];
 
+      reqContextTap = reqContext.contextTap;
+      if (reqContextTap) resContextTap = await reqContextTap(reqContext);
+
+      for await (const requestIntercept of requestIntercepts) {
+        reqContext = await requestIntercept(reqContext);
+      }
+
       if (reqContext.mock) {
         resContext = new ResponseContext<Result, Response>(reqContext).mock();
-        resContext.transform();
       } else {
-        reqContextTap = reqContext.contextTap;
-        if (reqContextTap) resContextTap = await reqContextTap(reqContext);
-
-        for await (const requestIntercept of requestIntercepts) {
-          reqContext = await requestIntercept(reqContext);
-        }
-
-        request = promiseToAbortablePromise(this.engine.doRequest(reqContext));
-
-        const requesting = this.requestPool.get([reqContext.method, reqContext.queryUrl]);
-        if (requesting) {
-          if (reqContext.repeatRequestAbort) this.engine.doAbort(requesting);
-
-          if (reqContext.repeatRequestAwait) {
-            const ctx = reqContext;
-            await new Promise((resolve) => {
-              const timer = setInterval(() => {
-                !this.requestPool.has([ctx.method, ctx.queryUrl]) && resolve(true), clearInterval(timer);
-              }, 300);
-            });
-          }
-        }
-
-        this.requestPool.set([reqContext.method, reqContext.queryUrl], request);
-
+        request = this.engine.doRequest(reqContext);
+        this.requestPool.set(`${reqContext.method}:${reqContext.queryUrl}`, request);
         const response = await request;
+        this.requestPool.delete(`${reqContext.method}:${reqContext.queryUrl}`);
         resContext = new ResponseContext<Result, Response>(reqContext, response);
-        resContext.transform();
-
-        if (resContextTap) await resContextTap(resContext);
       }
+
+      resContext.transform();
+
+      if (resContextTap) await resContextTap(resContext);
 
       for await (const responseIntercept of responseIntercepts) {
         resContext = await responseIntercept(resContext);
@@ -151,12 +135,10 @@ export class Requestor<Response = any, Environment extends string = any> {
 
       return resContext;
     } catch (error) {
-      const requestError = new Error(error.message ?? error);
+      const requestError = new Error(error.message);
       error.name = "RequestError";
 
       throw requestError;
-    } finally {
-      if (reqContext) this.requestPool.delete([reqContext.method, reqContext.queryUrl]);
     }
   }
 
