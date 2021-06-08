@@ -56,7 +56,7 @@ export function Http(
         let responseContext;
 
         try {
-          await requestor.requestContext
+          responseContext = await requestor.requestContext
             .merge(
               createRequestContext()
                 .setBaseUrl(baseUrl)
