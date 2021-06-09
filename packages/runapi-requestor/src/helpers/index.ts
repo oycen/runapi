@@ -41,3 +41,17 @@ export function getApplicationClient() {
   if (window) return "browser";
   return "wechatminiapp";
 }
+
+export async function waitDone(callBack: () => boolean, delay: number) {
+  return new Promise<boolean>((resolve) => {
+    if (callBack()) {
+      const timer = setTimeout(() => {
+        if (!callBack()) {
+          resolve(true);
+          clearTimeout(timer);
+        }
+      }, 300);
+    }
+    resolve(true);
+  });
+}

@@ -4,7 +4,7 @@ import { FetchEngine } from "../engine/impl/fetch-engine";
 import { WxmpEngine } from "../engine/impl/wxmp-engine";
 import { RequestContext } from "../context/request-context";
 import { ResponseContext } from "../context/response-context";
-import { splitHostnameByHyphen, isDomainUrl, isLocalUrl, getApplicationClient } from "../helpers";
+import { splitHostnameByHyphen, isDomainUrl, isLocalUrl, getApplicationClient, waitDone } from "../helpers";
 
 export type RequestEnv<Environment extends string> = Record<Environment, string | undefined>;
 export type RequestClient = "browser" | "wechatminiapp";
@@ -96,6 +96,7 @@ export class Requestor<Response = any, Environment extends string = any> {
     let reqContextTap;
     let resContextTap;
     let request;
+    let similarRequest: string | undefined;
 
     try {
       reqContext = this.requestContext.merge(requestContext);
@@ -115,10 +116,14 @@ export class Requestor<Response = any, Environment extends string = any> {
       if (reqContext.mock) {
         resContext = new ResponseContext<Result, Response>(reqContext).mock();
       } else {
+        similarRequest = `${reqContext.method.toLocaleUpperCase()}:${reqContext.queryUrl}`;
+
+        await waitDone(() => this.requestPool.has(similarRequest as string), 300);
+
         request = this.engine.doRequest(reqContext);
-        this.requestPool.set(`${reqContext.method}:${reqContext.queryUrl}`, request);
+        this.requestPool.set(similarRequest, request);
         const response = await request;
-        this.requestPool.delete(`${reqContext.method}:${reqContext.queryUrl}`);
+        this.requestPool.delete(similarRequest);
         resContext = new ResponseContext<Result, Response>(reqContext, response);
       }
 
@@ -132,6 +137,8 @@ export class Requestor<Response = any, Environment extends string = any> {
 
       return resContext;
     } catch (error) {
+      similarRequest && this.requestPool.delete(similarRequest);
+
       const requestError = new Error(error.message);
       error.name = "RequestError";
 
