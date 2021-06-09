@@ -4,6 +4,7 @@ import { FetchEngine } from "../engine/impl/fetch-engine";
 import { WxmpEngine } from "../engine/impl/wxmp-engine";
 import { RequestContext } from "../context/request-context";
 import { ResponseContext } from "../context/response-context";
+import { RequestError } from "../error/request-error";
 import { splitHostnameByHyphen, isDomainUrl, isLocalUrl, getApplicationClient, waitDone } from "../helpers";
 
 export type RequestEnv<Environment extends string> = Record<Environment, string | undefined>;
@@ -139,10 +140,7 @@ export class Requestor<Response = any, Environment extends string = any> {
     } catch (error) {
       similarRequest && this.requestPool.delete(similarRequest);
 
-      const requestError = new Error(error.message);
-      error.name = "RequestError";
-
-      throw requestError;
+      throw new RequestError(error.message, resContext?.status, resContext?.statusText, resContext);
     }
   }
 
