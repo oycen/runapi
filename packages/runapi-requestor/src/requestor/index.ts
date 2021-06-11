@@ -1,4 +1,4 @@
-import { Engine } from "../engine";
+import { Engine, RequestPromise } from "../engine";
 import { Interceptor } from "../interceptor";
 import { FetchEngine } from "../engine/impl/fetch-engine";
 import { WxmpEngine } from "../engine/impl/wxmp-engine";
@@ -81,7 +81,7 @@ export class Requestor<Response = any, Environment extends string = any> {
   readonly requestContext: RequestContext = new RequestContext();
 
   /** 请求池 */
-  readonly requestPool: Map<string, Promise<Response>> = new Map();
+  readonly requestPool: Map<string, Promise<Response> | RequestPromise<Response>> = new Map();
 
   constructor(engine: Engine<Response>, requestContext?: RequestContext, requestEnv?: RequestEnv<Environment>) {
     this.engine = engine;
@@ -96,8 +96,8 @@ export class Requestor<Response = any, Environment extends string = any> {
     let resContext;
     let reqContextTap;
     let resContextTap;
-    let request;
-    let similarRequest: string | undefined;
+    let request: Promise<Response> | RequestPromise<Response>;
+    let similarRequestKey: string | undefined;
 
     try {
       reqContext = this.requestContext.merge(requestContext);
@@ -117,14 +117,27 @@ export class Requestor<Response = any, Environment extends string = any> {
       if (reqContext.mock) {
         resContext = new ResponseContext<Result, Response>(reqContext).mock();
       } else {
-        similarRequest = `${reqContext.method.toLocaleUpperCase()}:${reqContext.queryUrl}`;
-
-        await waitDone(() => this.requestPool.has(similarRequest as string), 300);
+        let similar = reqContext.similar;
+        if (typeof reqContext.similar === "function") {
+          const dynamicSimilar = reqContext.similar(reqContext);
+          similarRequestKey = dynamicSimilar[0];
+          similar = dynamicSimilar[1];
+        } else {
+          similarRequestKey = `${reqContext.method.toLocaleUpperCase()}:${reqContext.queryUrl}`;
+        }
 
         request = this.engine.doRequest(reqContext);
-        this.requestPool.set(similarRequest, request);
+        this.requestPool.set(similarRequestKey, request);
+
+        if (similar === "abort") {
+          const similarRequest = this.requestPool.get(similarRequestKey);
+          if (similarRequest instanceof RequestPromise) similarRequest.abort();
+        } else if (similar === "wait-done") {
+          await waitDone(() => this.requestPool.has(similarRequestKey as string), 300);
+        }
+
         const response = await request;
-        this.requestPool.delete(similarRequest);
+        this.requestPool.delete(similarRequestKey);
         resContext = new ResponseContext<Result, Response>(reqContext, response);
       }
 
@@ -138,9 +151,9 @@ export class Requestor<Response = any, Environment extends string = any> {
 
       return resContext;
     } catch (error) {
-      similarRequest && this.requestPool.delete(similarRequest);
+      similarRequestKey && this.requestPool.delete(similarRequestKey);
 
-      throw new RequestError(error.message, resContext?.status, resContext?.statusText, resContext);
+      throw new RequestError(error.name, error.message, resContext?.status, resContext?.statusText, resContext);
     }
   }
 

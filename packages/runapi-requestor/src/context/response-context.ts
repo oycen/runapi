@@ -9,11 +9,14 @@ export class ResponseContext<Result = unknown, Response = any> {
   /** 响应对象 */
   response?: Response;
 
+  /** 响应是否正确 */
+  ok!: boolean;
+
   /** 响应状态 */
-  status?: string | number;
+  status!: string | number;
 
   /** 响应状态描述 */
-  statusText?: string;
+  statusText!: string;
 
   /** 响应数据结果 */
   result?: Result;

@@ -3,8 +3,10 @@ import { Requestor } from "../requestor";
 import { ResponseContext } from "./response-context";
 
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
 export type RequestCredentials = "include" | "omit" | "same-origin" | boolean;
+
+export type Similar = "abort" | "wait-done";
+export type RequestSimilar = Similar | ((requestContext: RequestContext) => [string, Similar]);
 
 export type RequestContextTap<T> = (requestContext: RequestContext) => T;
 export type ResponseContextTap<T> = (responseContext: ResponseContext<any, any>) => T;
@@ -30,6 +32,7 @@ export function createRequestContext(requestContextPlain?: RequestContextPlain) 
     .setBody(requestContextPlain?.body)
     .setMock(requestContextPlain?.mock)
     .setModel(requestContextPlain?.model)
+    .setSimilar(requestContextPlain?.similar)
     .setOthers(requestContextPlain?.others)
     .setContextTap(requestContextPlain?.contextTap);
 }
@@ -73,6 +76,9 @@ export interface RequestContextPlain {
 
   /** 响应对象模型 */
   model?: ModelConstructor;
+
+  /** 类似请求处理方式 */
+  similar?: RequestSimilar;
 
   /** 需要传递给引擎的其他参数 */
   others?: any;
@@ -120,6 +126,9 @@ export class RequestContext {
 
   /** 响应对象模型 */
   model?: ModelConstructor;
+
+  /** 类似请求处理方式 */
+  similar?: RequestSimilar;
 
   /** 需要传递给引擎的其他参数 */
   others?: any;
@@ -208,6 +217,12 @@ export class RequestContext {
     return this;
   }
 
+  /** 设置类似请求处理方式 */
+  setSimilar(similar: RequestContext["similar"]) {
+    this.similar = similar;
+    return this;
+  }
+
   /** 设置需要传递给引擎的其他参数 */
   setOthers(others: RequestContext["others"]) {
     this.others = others;
@@ -239,6 +254,7 @@ export class RequestContext {
       .setBody(Object.assign({}, this.body, source.body))
       .setMock(source.mock ?? this.mock)
       .setModel(source.model ?? this.model)
+      .setSimilar(source.similar ?? this.similar)
       .setOthers(source.others ?? this.others)
       .setContextTap(source.contextTap ?? this.contextTap);
   }
