@@ -112,21 +112,22 @@ export class FetchEngine extends Engine<Response> {
 
 实例属性：
 
-| 名称        | 作用/描述                | 类型                   | 默认值    | 合并规则      |
-| :---------- | ------------------------ | ---------------------- | --------- | ------------- |
-| baseUrl     | 请求基础URL              | string                 | undefined | 覆盖          |
-| basePath    | 请求基础路径             | string                 | undefined | 覆盖          |
-| path        | 请求路径                 | string                 | undefined | 覆盖          |
-| method      | 请求方法                 | RequestMethod          | "GET"     | 覆盖          |
-| headers     | 请求头                   | Record<string, string> | undefined | Object.assign |
-| credentials | 是否允许携带跨域cookies  | RequestCredentials     | undefined | 覆盖          |
-| params      | 请求路径参数             | Record<string, any>    | undefined | Object.assign |
-| query       | 请求查询参数             | Record<string, any>    | undefined | Object.assign |
-| body        | 请求体参数               | Record<string, any>    | undefined | Object.assign |
-| mock        | 模拟数据模板             | any                    | undefined | 覆盖          |
-| model       | 响应结果模型             | Constructor            | undefined | 覆盖          |
-| others      | 需要传递给引擎的其他参数 | any                    | undefined | 覆盖          |
-| contextTap  | 请求前后回调函数         | ContextTap             | undefined | 覆盖          |
+| 名称        | 作用/描述                | 类型                   | 默认值    | 合并规则                  |
+| :---------- | ------------------------ | ---------------------- | --------- | ------------------------- |
+| baseUrl     | 请求基础URL              | string                 | undefined | 覆盖                      |
+| basePath    | 请求基础路径             | string                 | undefined | 以"/"开头覆盖，反之则拼接 |
+| path        | 请求路径                 | string                 | undefined | 覆盖                      |
+| method      | 请求方法                 | RequestMethod          | "GET"     | 覆盖                      |
+| headers     | 请求头                   | Record<string, string> | undefined | Object.assign             |
+| credentials | 是否允许携带跨域cookies  | RequestCredentials     | undefined | 覆盖                      |
+| params      | 请求路径参数             | Record<string, any>    | undefined | Object.assign             |
+| query       | 请求查询参数             | Record<string, any>    | undefined | Object.assign             |
+| body        | 请求体参数               | Record<string, any>    | undefined | Object.assign             |
+| mock        | 模拟数据模板             | any                    | undefined | 覆盖                      |
+| model       | 响应结果模型             | Constructor            | undefined | 覆盖                      |
+| similar     | 类似请求处理方式         | RequestSimilar         | undefined | 覆盖                      |
+| others      | 需要传递给引擎的其他参数 | any                    | undefined | 覆盖                      |
+| contextTap  | 请求前后回调函数         | ContextTap             | undefined | 覆盖                      |
 
 实例方法：
 

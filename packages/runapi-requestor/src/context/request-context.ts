@@ -1,4 +1,4 @@
-import { buildUrl, combineUrl, compilePath, objectToQueryString } from "../helpers";
+import { buildUrl, combinePath, combineUrl, compilePath, objectToQueryString } from "../helpers";
 import { Requestor } from "../requestor";
 import { ResponseContext } from "./response-context";
 
@@ -244,7 +244,7 @@ export class RequestContext {
   merge(source: RequestContext) {
     return new RequestContext()
       .setBaseUrl(source.baseUrl ?? this.baseUrl)
-      .setBasePath(source.basePath ?? this.basePath)
+      .setBasePath(combinePath(this.basePath ?? "", source.basePath ?? ""))
       .setPath(source.path ?? this.path)
       .setMethod(source.method ?? this.method)
       .setHeaders(Object.assign({}, this.headers, source.headers))
