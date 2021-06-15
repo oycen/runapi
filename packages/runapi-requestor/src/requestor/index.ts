@@ -1,4 +1,4 @@
-import { Engine, RequestPromise } from "../engine";
+import { Engine, EngineAbortPromise } from "../engine";
 import { Interceptor } from "../interceptor";
 import { FetchEngine } from "../engine/impl/fetch-engine";
 import { WxmpEngine } from "../engine/impl/wxmp-engine";
@@ -81,7 +81,7 @@ export class Requestor<Response = any, Environment extends string = any> {
   readonly requestContext: RequestContext = new RequestContext();
 
   /** 请求池 */
-  readonly requestPool: Map<string, Promise<Response> | RequestPromise<Response>> = new Map();
+  readonly requestPool: Map<string, Promise<Response> | EngineAbortPromise<Response>> = new Map();
 
   constructor(engine: Engine<Response>, requestContext?: RequestContext, requestEnv?: RequestEnv<Environment>) {
     this.engine = engine;
@@ -96,7 +96,7 @@ export class Requestor<Response = any, Environment extends string = any> {
     let resContext;
     let reqContextTap;
     let resContextTap;
-    let request: Promise<Response> | RequestPromise<Response>;
+    let request: Promise<Response> | EngineAbortPromise<Response>;
     let similarRequestKey: string | undefined;
 
     try {
@@ -126,20 +126,20 @@ export class Requestor<Response = any, Environment extends string = any> {
           similarRequestKey = `${reqContext.method.toLocaleUpperCase()}:${reqContext.queryUrl}`;
         }
 
-        request = this.engine.doRequest(reqContext);
-        this.requestPool.set(similarRequestKey, request);
-
         if (similar === "abort") {
           const similarRequest = this.requestPool.get(similarRequestKey);
-          if (similarRequest instanceof RequestPromise) similarRequest.abort();
+          if (similarRequest instanceof EngineAbortPromise) similarRequest.abort();
         } else if (similar === "wait-done") {
           await waitDone(() => this.requestPool.has(similarRequestKey as string), 300);
         }
 
+        request = this.engine.doRequest(reqContext);
+        this.requestPool.set(similarRequestKey, request);
+
         const response = await request;
         this.requestPool.delete(similarRequestKey);
 
-        const { ok, status, statusText, result } = await this.engine.doResponse(response);
+        const { ok, status, statusText, result } = await this.engine.doResponse(response, reqContext);
         resContext = new ResponseContext<Result, Response>(reqContext, response);
         resContext.ok = ok;
         resContext.status = status;
@@ -147,13 +147,13 @@ export class Requestor<Response = any, Environment extends string = any> {
         resContext.result = result;
       }
 
-      resContext.model();
-
       if (resContextTap) await resContextTap(resContext);
 
       for await (const responseIntercept of responseIntercepts) {
         resContext = await responseIntercept(resContext);
       }
+
+      if (resContext.ok) resContext.model();
 
       return resContext;
     } catch (error) {

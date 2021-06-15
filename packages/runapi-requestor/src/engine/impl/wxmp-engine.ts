@@ -14,7 +14,7 @@ export class WxmpEngine extends Engine<WxmpResponse> {
   doRequest({ url, method, headers, body, others }: RequestContext) {
     let abort = () => {};
 
-    return new Engine.RequestPromise<WxmpResponse>((resolve, reject) => {
+    return new Engine.EngineAbortPromise<WxmpResponse>((resolve, reject) => {
       if (method === "PATCH") throw new Error("请求方法'PATCH'不受支持");
 
       const request = wx.request({

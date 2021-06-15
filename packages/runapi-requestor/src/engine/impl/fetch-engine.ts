@@ -5,7 +5,7 @@ export class FetchEngine extends Engine<Response> {
   doRequest({ queryUrl, method, headers, credentials, body, others }: RequestContext) {
     const { signal, abort } = new AbortController();
 
-    return new Engine.RequestPromise<Response>((resolve, reject) => {
+    return new Engine.EngineAbortPromise<Response>((resolve, reject) => {
       window
         .fetch(queryUrl, {
           method,
