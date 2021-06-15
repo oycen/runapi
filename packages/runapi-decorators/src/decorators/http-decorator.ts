@@ -1,4 +1,4 @@
-import { Requestor, RequestContext, ModelConstructor, Interceptor, createRequestContext } from "@runapi/requestor";
+import { Requestor, RequestContext, ModelConstructor, createRequestContext } from "@runapi/requestor";
 import { serviceMetadataKey } from "./service-decorator";
 import { baseUrlMetadataKey } from "./base-url-decorator";
 import { headersMetadataKey } from "./headers-decorator";
@@ -7,7 +7,7 @@ import { queryMetadataKey } from "./query-decorator";
 import { bodyMetadataKey } from "./body-decorator";
 import { mockMetadataKey } from "./mock-decorator";
 import { modelMetadataKey } from "./model-decorator";
-import { interceptorsMetadataKey } from "./interceptors-decorator";
+import { similarMetadataKey } from "./similar-decorator";
 
 export function Http(
   methods?: RequestContext["method"],
@@ -17,11 +17,11 @@ export function Http(
   return function (target, propertyKey, descriptor: TypedPropertyDescriptor<any>) {
     const httpMetadataKey = `http:${target.constructor.name}:${propertyKey.toString()}`;
 
-    const baseUrl = Reflect.getMetadata(baseUrlMetadataKey, target) as RequestContext["baseUrl"] | undefined;
-    const headers = Reflect.getMetadata(headersMetadataKey, target) as RequestContext["headers"] | undefined;
-    const mock = Reflect.getMetadata(mockMetadataKey, target) as RequestContext["mock"] | undefined;
-    const model = Reflect.getMetadata(modelMetadataKey, target) as ModelConstructor | undefined;
-    const interceptors = Reflect.getMetadata(interceptorsMetadataKey, target) as Interceptor[] | undefined;
+    const baseUrl = Reflect.getMetadata(baseUrlMetadataKey, target) as RequestContext["baseUrl"];
+    const headers = Reflect.getMetadata(headersMetadataKey, target) as RequestContext["headers"];
+    const mock = Reflect.getMetadata(mockMetadataKey, target) as RequestContext["mock"];
+    const model = Reflect.getMetadata(modelMetadataKey, target) as RequestContext["model"];
+    const similar = Reflect.getMetadata(similarMetadataKey, target) as RequestContext["similar"];
 
     const paramsArgIndex = Reflect.getMetadata(paramsMetadataKey, target);
     const queryArgIndex = Reflect.getMetadata(queryMetadataKey, target);
@@ -46,8 +46,6 @@ export function Http(
 
       if (!requestor) return;
 
-      if (interceptors) requestor.use(...interceptors);
-
       const params = arguments[paramsArgIndex];
       const query = arguments[queryArgIndex];
       const body = arguments[bodyArgIndex];
@@ -63,11 +61,12 @@ export function Http(
                 .setMethod(methods ?? "GET")
                 .setHeaders(headers)
                 .setPath(path)
-                .setParams(params)
-                .setQuery(query)
-                .setBody(body)
+                .setParams(Object.assign({}, data?.params ?? {}, params))
+                .setQuery(Object.assign({}, data?.query ?? {}, query))
+                .setBody(Object.assign({}, data?.body ?? {}, body))
                 .setMock(mock)
                 .setModel(model)
+                .setSimilar(similar)
             )
             .send(requestor);
 

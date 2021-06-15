@@ -129,6 +129,15 @@ export class FetchEngine extends Engine<Response> {
 | others      | 需要传递给引擎的其他参数 | any                    | undefined | 覆盖                      |
 | contextTap  | 请求前后回调函数         | ContextTap             | undefined | 覆盖                      |
 
+实例计算属性：
+
+| 名称        | 作用/描述                 | 类型   |
+| ----------- | ------------------------- | ------ |
+| fullpath    | 请求完整路径              | string |
+| url         | 请求完整URL               | string |
+| queryString | 查询字符串                | string |
+| queryUrl    | 带查询字符串的请求完整URL | string |
+
 实例方法：
 
 | 名称  | 作用/描述            | 参数                 |
@@ -159,20 +168,13 @@ getUsers();
 
 实例属性：
 
-| 名称           | 作用/描述                                                    |
-| -------------- | ------------------------------------------------------------ |
-| requestContext | 请求上下文                                                   |
-| response       | 请求引擎响应对象                                             |
-| status         | 响应状态。默认为undefined，使用需在contextTap指定，建议指定。 |
-| statusText     | 响应状态描述。默认为undefined，使用需在contextTap指定，建议指定。 |
-| result         | 响应结果数据。默认为undefined，使用需在contextTap指定，建议指定。 |
-
-实例方法：
-
-| 名称  | 作用/描述                                                    |
-| ----- | ------------------------------------------------------------ |
-| mock  | 模拟数据。在请求上下文中指定mock模板，将会自动调用。如果在响应完成后手动调用则会再次模拟产生新的模拟数据覆盖"result"。 |
-| model | 响应结果数据转换为数据模型，从普通对象(plain object)转换为类实例对象(class object)。在请求上下文中指定model类，将会自动调用。 |
+| 名称           | 作用/描述        |
+| -------------- | ---------------- |
+| requestContext | 请求上下文       |
+| response       | 请求引擎响应对象 |
+| status         | 响应状态         |
+| statusText     | 响应状态描述     |
+| result         | 响应结果数据     |
 
 ### 异常处理
 
@@ -188,7 +190,11 @@ import {
 } from "@runapi/requestor";
 
 const requestor = createFetchRequestor(
-  createRequestContext().setBaseUrl("https://development.xxx.com")
+  createRequestContext()
+    .setBaseUrl("https://development.xxx.com")
+    .setContextTap((reqCtx) => (resCtx) => {
+      if (!resCtx.ok) throw new Error("Request failed");
+    })
 );
 
 async function getUsers() {
@@ -209,5 +215,449 @@ getUsers();
 
 [@runapi/requestor](https://www.npmjs.com/package/@runapi/decorators): 基于"@runapi/requestor"的装饰器，使用装饰模式定义接口请求函数。
 
+### Service Decorator
+
+使用Service装饰器将class定义为Service
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+@Service(requestor)
+class UserService {}
+
+export const userService = new UserService();
+
+```
+
 ### Http Decorator
+
+使用Http装饰器定义请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Http, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Http("GET", "/user/:userId", { params: { userId: "1" } })
+  findUserByUserId(): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Get Decorator
+
+使用Get装饰器定义获取资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/users", { query: { username: "jake", page: 1, size: 10 } })
+  findUsersByPage(): ResponseContextPromise<User[]> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Post Decorator
+
+使用Post装饰器定义创建资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Post, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Post("/user", { body: { username: "jake", gender: "male" } })
+  createUser(): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Put Decorator
+
+使用Put装饰器定义替换资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Put, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Put("/user", { body: { userId: "1", username: "jake", gender: "female" } })
+  updateUser(): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Patch Decorator
+
+使用Patch装饰器定义更新资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Patch, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Patch("/user", { body: { userId: "2", username: "rose" } })
+  updateUser(): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Delete Decorator
+
+使用Delete装饰器定义删除资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Delete, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Delete("/user/:userId", { params: { userId: "1" } })
+  deleteUser(): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Params Decorator
+
+使用Params装饰器定义路径参数
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/user/:userId")
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Query Decorator
+
+使用Query装饰器定义查询字符串参数
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Query, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/users")
+  findUsersByPage(
+    @Query() query: { username: string; page: number; size: number }
+  ): ResponseContextPromise<User[]> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Body Decorator
+
+使用Body装饰器定义请求体参数
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Body, Put, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Put("/user")
+  updateUser(
+    @Body() body: { userId: string; username: string; gender: string }
+  ): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### BaseUrl Decorator
+
+使用BaseUrl装饰器定义请求基础URL
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import {
+  BaseUrl,
+  Get,
+  Params,
+  ResponseContextPromise,
+  Service,
+} from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext());
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/user/:userId")
+  @BaseUrl("https://xxx.com")
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Headers Decorator
+
+使用Headers装饰器定义请求头
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import {
+  BaseUrl,
+  Headers,
+  Get,
+  Params,
+  ResponseContextPromise,
+  Service,
+} from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext());
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/user/:userId")
+  @BaseUrl("https://xxx.com")
+  @Headers({ "content-type": "application/json" })
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Mock Decorator
+
+使用Mock装饰器定义请求模拟数据模版
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Mock, Query, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/users")
+  @Mock({
+    "users|1-10": [
+      {
+        "id|+1": 1,
+        username: "@cname",
+        gender: "gender",
+      },
+    ],
+  })
+  findUsersByPage(
+    @Query() query: { username: string; page: number; size: number }
+  ): ResponseContextPromise<{ users: User[] }> {}
+}
+
+export const userService = new UserService();
+
+```
+
+### Model Decorator
+
+使用Model装饰器定义响应数据模型
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Model, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+class User {
+  userId!: string;
+  firstname!: string;
+  lastname!: string;
+  gender!: string;
+
+  get username() {
+    return this.firstname + this.lastname;
+  }
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/user/:userId")
+  @Model(User)
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
+}
+
+```
+
+### Similar Decorator
+
+使用Similar装饰器定义类似请求处理方式
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Query, ResponseContextPromise, Service, Similar } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(
+  createRequestContext().setBaseUrl("https://xxx.com")
+);
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/users")
+  // @Similar("wait-done")
+  @Similar("abort")
+  findUsersByPage(
+    @Query() query: { username: string; page: number; size: number }
+  ): ResponseContextPromise<User[]> {}
+}
+
+export const userService = new UserService();
+
+```
 

@@ -7,7 +7,7 @@ export class ResponseContext<Result = unknown, Response = any> {
   requestContext: RequestContext;
 
   /** 响应对象 */
-  response?: Response;
+  response: Response;
 
   /** 响应是否正确 */
   ok!: boolean;
@@ -19,9 +19,9 @@ export class ResponseContext<Result = unknown, Response = any> {
   statusText!: string;
 
   /** 响应数据结果 */
-  result?: Result;
+  result!: Result;
 
-  constructor(requestContext: RequestContext, response?: Response) {
+  constructor(requestContext: ResponseContext["requestContext"], response: ResponseContext["response"]) {
     this.requestContext = requestContext;
     this.response = response;
   }
@@ -30,6 +30,7 @@ export class ResponseContext<Result = unknown, Response = any> {
   mock() {
     if (this.requestContext.mock) {
       const mockData = Mock.mock(this.requestContext.mock);
+      this.ok = true;
       this.status = 200;
       this.statusText = "mock succeeded";
       this.result = mockData;

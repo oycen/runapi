@@ -115,7 +115,7 @@ export class Requestor<Response = any, Environment extends string = any> {
       }
 
       if (reqContext.mock) {
-        resContext = new ResponseContext<Result, Response>(reqContext).mock();
+        resContext = new ResponseContext<Result, Response>(reqContext, {}).mock();
       } else {
         let similar = reqContext.similar;
         if (typeof reqContext.similar === "function") {
@@ -138,16 +138,22 @@ export class Requestor<Response = any, Environment extends string = any> {
 
         const response = await request;
         this.requestPool.delete(similarRequestKey);
+
+        const { ok, status, statusText, result } = await this.engine.doResponse(response);
         resContext = new ResponseContext<Result, Response>(reqContext, response);
+        resContext.ok = ok;
+        resContext.status = status;
+        resContext.statusText = statusText;
+        resContext.result = result;
       }
+
+      resContext.model();
 
       if (resContextTap) await resContextTap(resContext);
 
       for await (const responseIntercept of responseIntercepts) {
         resContext = await responseIntercept(resContext);
       }
-
-      resContext.model();
 
       return resContext;
     } catch (error) {

@@ -1,14 +1,17 @@
 type Constructor<T = any> = { new (...args: any[]): T };
 
 export function ServiceScanner(services: Constructor[]) {
-  Scanner.services = services;
-  return Scanner;
+  return new Scanner(services);
 }
 
-class Scanner {
-  static services: any[];
+export class Scanner {
+  services: Constructor[];
 
-  static scanApiMetadata() {
+  constructor(services: Scanner["services"]) {
+    this.services = services;
+  }
+
+  scan() {
     const apiMetadata: any[] = [];
 
     this.services.forEach((service) => {

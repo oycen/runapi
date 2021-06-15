@@ -146,9 +146,14 @@ export class RequestContext {
     return buildUrl(this.baseUrl ?? "", this.fullpath);
   }
 
+  /** 查询字符串 */
+  get queryString() {
+    return objectToQueryString(this.query);
+  }
+
   /** 带查询字符串的请求完整URL */
   get queryUrl() {
-    return `${this.url}${objectToQueryString(this.query)}`;
+    return `${this.url}${this.queryString}`;
   }
 
   /** 设置请求基础URL */

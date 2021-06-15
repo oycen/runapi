@@ -1,319 +1,393 @@
-# @runapi/decorators
+---
+sidebarDepth: 2
+---
 
-_基于"@runapi/requestor"的装饰器，使用装饰模式封装接口请求函数。_
+# 指南
 
-## 简介
+## Decorators
 
-- 提供一系列装饰器，方便灵活封装接口请求函数。
-- 响应数据从普通对象(plain object)转换为类实例对象(class object)。
-- 响应数据类型或值不合法校验。
-- 支持 mock 数据。
-- 提供元数据扫描器，方便分析代码或用于生成自动化文档。
+[@runapi/requestor](https://www.npmjs.com/package/@runapi/decorators): 基于"@runapi/requestor"的装饰器，使用装饰模式定义接口请求函数。
 
-## 安装
+### Service Decorator
 
-Using npm:
-
-```bash
-npm install @runapi/decorators
-```
-
-## 基本用法
-
-##### 1. Service Decorator
+使用 Service 装饰器将 class 定义为 Service
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
 import { Service } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
 @Service(requestor)
-class APIService {}
+class UserService {}
 
-const apiService = new APIService();
+export const userService = new UserService();
 ```
 
-##### 2. Http & Get & Post & Put & Patch & Delete Decorator
+### Http Decorator
+
+使用 Http 装饰器定义请求方法
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Delete, Get, Http, Patch, Post, Put, ResponseContextPromise, Service } from "@runapi/decorators";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Http, ResponseContextPromise, Service } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
-class User {
-  username!: string;
-  phoneNumber!: string;
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
 }
 
 @Service(requestor)
 class UserService {
-  @Http("GET", "/users", { query: { username: "oyc" } })
-  getUsers(): ResponseContextPromise<User[]> {}
+  @Http("GET", "/user/:userId", { params: { userId: "1" } })
+  findUserByUserId(): ResponseContextPromise<User> {}
+}
 
-  @Get("/user/:username", { params: { username: "oycen" } })
-  getUser(): ResponseContextPromise<User> {}
+export const userService = new UserService();
+```
 
-  @Post("/user", { body: { username: "oycen", phoneNumber: "16616263646" } })
+### Get Decorator
+
+使用 Get 装饰器定义获取资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/users", { query: { username: "jake", page: 1, size: 10 } })
+  findUsersByPage(): ResponseContextPromise<User[]> {}
+}
+
+export const userService = new UserService();
+```
+
+### Post Decorator
+
+使用 Post 装饰器定义创建资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Post, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Post("/user", { body: { username: "jake", gender: "male" } })
   createUser(): ResponseContextPromise<User> {}
+}
 
-  @Put("/user/:userId", { params: { userId: "1" }, body: { username: "oycen", phoneNumber: "16616263646" } })
+export const userService = new UserService();
+```
+
+### Put Decorator
+
+使用 Put 装饰器定义替换资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Put, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Put("/user", { body: { userId: "1", username: "jake", gender: "female" } })
   updateUser(): ResponseContextPromise<User> {}
+}
 
-  @Patch("/user/:userId/username", { params: { userId: "1" }, body: { username: "oycen" } })
-  updateUserName(): ResponseContextPromise<User> {}
+export const userService = new UserService();
+```
 
+### Patch Decorator
+
+使用 Patch 装饰器定义更新资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Patch, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Patch("/user", { body: { userId: "2", username: "rose" } })
+  updateUser(): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+```
+
+### Delete Decorator
+
+使用 Delete 装饰器定义删除资源请求方法
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Delete, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
   @Delete("/user/:userId", { params: { userId: "1" } })
-  deleteUser(): ResponseContextPromise<void> {}
+  deleteUser(): ResponseContextPromise<User> {}
 }
 
-const userService = new UserService();
-
-userService.getUsers().then(({ result }) => console.log(result));
+export const userService = new UserService();
 ```
 
-##### 3. Params & Query & Body Decorator
+### Params Decorator
+
+使用 Params 装饰器定义路径参数
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Body, Delete, Get, Http, Params, Patch, Post, Put, Query, ResponseContextPromise, Service } from "@runapi/decorators";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Params, ResponseContextPromise, Service } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
-class User {
-  username!: string;
-  phoneNumber!: string;
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
 }
 
 @Service(requestor)
 class UserService {
-  @Http("GET", "/users")
-  getUsers(@Query() query: { username: string }): ResponseContextPromise<User[]> {}
-
-  @Get("/user/:username")
-  getUser(@Params() params: { username: string }): ResponseContextPromise<User> {}
-
-  @Post("/user")
-  createUser(@Body() body: { username: string; phoneNumber: string }): ResponseContextPromise<User> {}
-
-  @Put("/user/:userId")
-  updateUser(@Params() params: { userId: string }, @Body() body: { username: string; phoneNumber: string }): ResponseContextPromise<User> {}
-
-  @Patch("/user/:userId/username")
-  updateUserName(@Params() params: { userId: string }, @Body() body: { username: string }): ResponseContextPromise<User> {}
-
-  @Delete("/user/:userId")
-  deleteUser(@Params() params: { userId: string }): ResponseContextPromise<void> {}
+  @Get("/user/:userId")
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
 }
 
-const userService = new UserService();
-
-userService.getUsers({ username: "oycen" }).then(({ result }) => console.log(result));
-userService.getUser({ username: "oycen" }).then(({ result }) => console.log(result));
-userService.createUser({ username: "oycen", phoneNumber: "16616263646" }).then(({ result }) => console.log(result));
-userService.updateUser({ userId: "1" }, { username: "oycen", phoneNumber: "16616263646" }).then(({ result }) => console.log(result));
-userService.updateUserName({ userId: "1" }, { username: "oycen" }).then(({ result }) => console.log(result));
-userService.deleteUser({ userId: "1" }).then(({ result }) => console.log(result));
+export const userService = new UserService();
 ```
 
-##### 4. BaseUrl Decorator
+### Query Decorator
+
+使用 Query 装饰器定义查询字符串参数
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { BaseUrl, Http, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Query, ResponseContextPromise, Service } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
-class User {
-  username!: string;
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
 }
 
 @Service(requestor)
 class UserService {
-  @Http("GET", "/user/:username")
-  @BaseUrl("https://api.github.com")
-  getUser(@Params() params: { username: string }): ResponseContextPromise<User> {}
+  @Get("/users")
+  findUsersByPage(@Query() query: { username: string; page: number; size: number }): ResponseContextPromise<User[]> {}
 }
 
-const userService = new UserService();
-
-userService.getUser({ username: "oycen" }).then(({ result }) => console.log(result));
+export const userService = new UserService();
 ```
 
-##### 5. Headers Decorator
+### Body Decorator
+
+使用 Body 装饰器定义请求体参数
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Headers, Http, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Body, Put, ResponseContextPromise, Service } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
-class User {
-  username!: string;
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
 }
 
 @Service(requestor)
 class UserService {
-  @Http("GET", "/user/:username")
-  @Headers({ "Content-Type": "application/json; charset=utf-8" })
-  getUser(@Params() params: { username: string }): ResponseContextPromise<User> {}
+  @Put("/user")
+  updateUser(@Body() body: { userId: string; username: string; gender: string }): ResponseContextPromise<User> {}
 }
 
-const userService = new UserService();
-
-userService.getUser({ username: "oycen" }).then(({ result }) => console.log(result));
+export const userService = new UserService();
 ```
 
-##### 6. Model Decorator
+### BaseUrl Decorator
+
+使用 BaseUrl 装饰器定义请求基础 URL
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Http, Model, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { BaseUrl, Get, Params, ResponseContextPromise, Service } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext());
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/user/:userId")
+  @BaseUrl("https://xxx.com")
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+```
+
+### Headers Decorator
+
+使用 Headers 装饰器定义请求头
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { BaseUrl, Headers, Get, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext());
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/user/:userId")
+  @BaseUrl("https://xxx.com")
+  @Headers({ "content-type": "application/json" })
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
+}
+
+export const userService = new UserService();
+```
+
+### Mock Decorator
+
+使用 Mock 装饰器定义请求模拟数据模版
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Mock, Query, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
+
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
+}
+
+@Service(requestor)
+class UserService {
+  @Get("/users")
+  @Mock({
+    "users|1-10": [
+      {
+        "id|+1": 1,
+        username: "@cname",
+        gender: "gender",
+      },
+    ],
+  })
+  findUsersByPage(@Query() query: { username: string; page: number; size: number }): ResponseContextPromise<{ users: User[] }> {}
+}
+
+export const userService = new UserService();
+```
+
+### Model Decorator
+
+使用 Model 装饰器定义响应数据模型
+
+```typescript
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Model, Params, ResponseContextPromise, Service } from "@runapi/decorators";
+
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
 class User {
+  userId!: string;
   firstname!: string;
   lastname!: string;
+  gender!: string;
 
   get username() {
     return this.firstname + this.lastname;
   }
-
-  uppercaseUsername() {
-    return this.username.toLocaleUpperCase();
-  }
 }
 
 @Service(requestor)
 class UserService {
-  @Http("GET", "/user/:username")
-  getUser1(@Params() params: { username: string }): ResponseContextPromise<User> {}
-
-  @Http("GET", "/user/:username")
+  @Get("/user/:userId")
   @Model(User)
-  getUser2(@Params() params: { username: string }): ResponseContextPromise<User> {}
+  findUserByUserId(@Params() params: { userId: string }): ResponseContextPromise<User> {}
 }
-
-const userService = new UserService();
-
-userService.getUser1({ username: "oycen" }).then(({ result }) => {
-  console.log(result?.firstname); // ok
-  console.log(result?.lastname); // ok
-  console.log(result?.username); // error
-  console.log(result?.uppercaseUsername()); // error
-});
-
-userService.getUser2({ username: "oycen" }).then(({ result }) => {
-  console.log(result?.firstname); // ok
-  console.log(result?.lastname); // ok
-  console.log(result?.username); // ok
-  console.log(result?.uppercaseUsername()); // ok
-});
 ```
 
-##### 7. Validate Decorator
+### Similar Decorator
+
+使用 Similar 装饰器定义类似请求处理方式
 
 ```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Http, Model, Params, ResponseContextPromise, Service, Validate } from "@runapi/decorators";
-import { IsDefined, IsIn, IsOptional, IsString } from "class-validator";
+import { createFetchRequestor, createRequestContext } from "@runapi/requestor";
+import { Get, Query, ResponseContextPromise, Service, Similar } from "@runapi/decorators";
 
-const requestor = createAxiosRequestor();
+const requestor = createFetchRequestor(createRequestContext().setBaseUrl("https://xxx.com"));
 
-class User {
-  @IsString()
-  @IsDefined()
-  username!: string;
-
-  @IsIn(["male", "female"])
-  @IsOptional()
-  sex?: "male" | "female";
+interface User {
+  userId: string;
+  username: string;
+  gender: string;
 }
 
 @Service(requestor)
 class UserService {
-  @Http("GET", "/user/:username")
-  @Validate()
-  @Model(User)
-  getUser(@Params() params: { username: string }): ResponseContextPromise<User> {}
+  @Get("/users")
+  // @Similar("wait-done")
+  @Similar("abort")
+  findUsersByPage(@Query() query: { username: string; page: number; size: number }): ResponseContextPromise<User[]> {}
 }
 
-const userService = new UserService();
-
-userService.getUser({ username: "oycen" }).then(({ errors }) => console.log(errors));
-```
-
-##### 8. Mock Decorator
-
-```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Http, Mock, ResponseContextPromise, Service } from "@runapi/decorators";
-import { Random } from "mockjs";
-
-const requestor = createAxiosRequestor();
-
-class User {
-  userId!: number;
-  username!: string;
-}
-
-@Service(requestor)
-class UserService {
-  @Http("GET", "/users")
-  @Mock({
-    // 属性 users 的值是一个数组，其中含有 1 到 10 个元素
-    "users|1-10": [
-      {
-        // 属性 userId 是一个自增数，起始值为 1，每次增 1
-        "userId|+1": 1,
-        // 属性 username 是一个字符串，值为随机生成的中文姓名
-        username: Random.cname(),
-      },
-    ],
-  })
-  getUsers(): ResponseContextPromise<User[]> {}
-}
-
-const userService = new UserService();
-
-userService.getUsers().then(({ result }) => console.log(result));
-```
-
-##### 9. Notification Decorator
-
-```typescript
-import { createAxiosRequestor } from "@runapi/requestor";
-import { Http, ResponseContextPromise, Service, Notification, Notifier, NotificationMessage } from "@runapi/decorators";
-import { Message } from "element-ui";
-import { ElMessageOptions } from "element-ui/types/message";
-
-const requestor = createAxiosRequestor();
-
-class User {
-  username!: string;
-}
-
-class UserNotifier implements Notifier {
-  notify(message: string, options?: any): void {
-    Message({ message, duration: options?.duration });
-  }
-}
-
-const CustomNotification = (message: NotificationMessage, options?: Omit<ElMessageOptions, "message">) =>
-  Notification(new UserNotifier(), message, options);
-
-@Service(requestor)
-class UserService {
-  @Http("GET", "/users")
-  @Notification(new UserNotifier(), "获取用户失败")
-  getUsers1(): ResponseContextPromise<User[]> {}
-
-  @Http("GET", "/users")
-  @CustomNotification({ success: "获取用户成功", fail: (error) => error }, { duration: 3000 })
-  getUsers2(): ResponseContextPromise<User[]> {}
-}
-
-const userService = new UserService();
+export const userService = new UserService();
 ```
