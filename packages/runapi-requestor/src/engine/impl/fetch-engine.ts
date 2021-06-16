@@ -11,7 +11,7 @@ export class FetchEngine extends Engine<Response> {
           method,
           headers,
           credentials: typeof credentials === "boolean" ? "same-origin" : credentials ?? "same-origin",
-          body: body ? JSON.stringify(body) : null,
+          body: method !== "GET" && body ? JSON.stringify(body) : null,
           ...others,
           signal,
         })
