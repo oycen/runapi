@@ -88,6 +88,8 @@ export class Requestor<Response = any, Environment extends string = any> {
     this.requestEnv = requestEnv;
 
     if (requestContext) this.requestContext = this.requestContext.merge(requestContext);
+
+    if (Requestor.client === "browser") this.switch(window.localStorage.getItem("REQUESTOR_ENV") as Environment);
   }
 
   /** 发起请求 */
@@ -165,7 +167,7 @@ export class Requestor<Response = any, Environment extends string = any> {
 
   /** 切换请求环境 */
   switch(env: Environment) {
-    if (this.requestEnv) {
+    if (this.requestEnv && this.requestEnv[env]) {
       this.requestContext.baseUrl = this.requestEnv[env];
       this.env = env;
     }
