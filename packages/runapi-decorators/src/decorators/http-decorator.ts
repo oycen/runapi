@@ -1,4 +1,4 @@
-import { Requestor, RequestContext, ModelConstructor, createRequestContext } from "@runapi/requestor";
+import { Requestor, RequestContext, createRequestContext } from "@runapi/requestor";
 import { serviceMetadataKey } from "./service-decorator";
 import { baseUrlMetadataKey } from "./base-url-decorator";
 import { headersMetadataKey } from "./headers-decorator";
@@ -42,7 +42,8 @@ export function Http(
     );
 
     descriptor.value = function () {
-      const requestor = Reflect.getMetadata(serviceMetadataKey, target) as Requestor | undefined;
+      const serviceMetadata = Reflect.getMetadata(serviceMetadataKey, target) as Requestor | (() => Requestor) | undefined;
+      const requestor = typeof serviceMetadata === "function" ? serviceMetadata() : serviceMetadata;
 
       if (!requestor) return;
 
