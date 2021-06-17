@@ -17,6 +17,9 @@ export default {
     requestor: {
       require: true,
     },
+    name: {
+      type: String,
+    },
     move: {
       type: Boolean,
       default: true,
@@ -98,6 +101,9 @@ export default {
     },
     handleSwitch(env) {
       this.requestor.switch(env);
+      window && this.name && window.localStorage.setItem(this.name, env);
+      this.$emit("switch", env);
+
       this.showFabs = false;
 
       if (typeof this.reload === "boolean") {
