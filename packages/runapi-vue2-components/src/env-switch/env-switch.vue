@@ -117,9 +117,10 @@ export default {
 
 <style scoped>
 .switch-container {
-  position: absolute;
+  position: fixed;
   right: 20px;
   bottom: 20px;
+  z-index: 9999;
 }
 .switch-fab.action {
   position: relative;
