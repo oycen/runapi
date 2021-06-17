@@ -1,0 +1,27 @@
+{
+  "name": "@runapi/vue2-components",
+  "version": "10.7.1",
+  "description": "@runapi/vue2-components",
+  "keywords": [
+    "@runapi/vue2-components",
+    "runapi",
+    "vue2-components"
+  ],
+  "author": "oycen<oycen@sina.com>",
+  "homepage": "https://github.com/oycen/runapi#readme",
+  "license": "MIT",
+  "main": "./src",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oycen/runapi.git"
+  },
+  "scripts": {},
+  "bugs": {
+    "url": "https://github.com/oycen/runapi/issues"
+  },
+  "gitHead": "cc0dd1374d1eb34e238de348c86ec4c10ba4d7b2"
+}
