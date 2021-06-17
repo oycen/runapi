@@ -19,7 +19,10 @@
     "type": "git",
     "url": "git+https://github.com/oycen/runapi.git"
   },
-  "scripts": {},
+  "scripts": {
+    "build": "echo \"Null command\"",
+    "clean": "echo \"Null command\""
+  },
   "bugs": {
     "url": "https://github.com/oycen/runapi/issues"
   },
