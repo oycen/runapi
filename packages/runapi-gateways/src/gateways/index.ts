@@ -1,4 +1,4 @@
-import { RequestContext, Requestor } from "@runapi/requestor";
+import * as requestor from "@runapi/requestor";
 import { Service } from "@runapi/decorators";
 
 export function createGateways() {
@@ -6,8 +6,10 @@ export function createGateways() {
 }
 
 export class Gateways {
-  configuration: { requestContext?: RequestContext | undefined } = {};
-  services: Record<string, Requestor> = {};
+  static Requestor = requestor;
+
+  configuration: { requestContext?: requestor.RequestContext | undefined } = {};
+  services: Record<string, requestor.Requestor> = {};
 
   load(url: string) {
     const createScript = (src: string) => {
@@ -33,7 +35,7 @@ export class Gateways {
     this.configuration = configuration;
   }
 
-  register(name: string, requestor: Requestor) {
+  register(name: string, requestor: requestor.Requestor) {
     if (this.configuration.requestContext) {
       requestor.requestContext = requestor.requestContext.merge(this.configuration.requestContext);
     }
