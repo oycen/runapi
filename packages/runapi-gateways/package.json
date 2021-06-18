@@ -1,14 +1,11 @@
 {
-  "name": "@runapi/decorators",
-  "version": "10.8.0",
-  "description": "@runapi/decorators",
+  "name": "@runapi/gateways",
+  "version": "10.7.3",
+  "description": "@runapi/gateways",
   "keywords": [
-    "@runapi/decorators",
+    "@runapi/gateways",
     "runapi",
-    "decorators",
-    "http",
-    "request",
-    "request-decorators"
+    "gateways"
   ],
   "author": "oycen<oycen@sina.com>",
   "homepage": "https://github.com/oycen/runapi#readme",
@@ -29,11 +26,9 @@
   "bugs": {
     "url": "https://github.com/oycen/runapi/issues"
   },
-  "peerDependencies": {
-    "reflect-metadata": "^0.1.13"
-  },
   "dependencies": {
     "@runapi/requestor": "^10.7.3",
+    "@runapi/decorators": "^10.7.3",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {

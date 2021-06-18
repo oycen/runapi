@@ -78,7 +78,7 @@ export class Requestor<Response = any, Environment extends string = any> {
   readonly interceptors: Interceptor<Response>[] = [];
 
   /** 全局请求上下文 */
-  readonly requestContext: RequestContext = new RequestContext();
+  requestContext: RequestContext = new RequestContext();
 
   /** 请求池 */
   readonly requestPool: Map<string, Promise<Response> | EngineAbortPromise<Response>> = new Map();
