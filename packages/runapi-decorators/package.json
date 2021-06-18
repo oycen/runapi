@@ -1,6 +1,6 @@
 {
   "name": "@runapi/decorators",
-  "version": "10.8.0",
+  "version": "11.0.0",
   "description": "@runapi/decorators",
   "keywords": [
     "@runapi/decorators",
@@ -33,7 +33,7 @@
     "reflect-metadata": "^0.1.13"
   },
   "dependencies": {
-    "@runapi/requestor": "^10.7.3",
+    "@runapi/requestor": "^11.0.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {

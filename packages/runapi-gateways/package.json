@@ -1,6 +1,6 @@
 {
   "name": "@runapi/gateways",
-  "version": "10.7.3",
+  "version": "11.0.0",
   "description": "@runapi/gateways",
   "keywords": [
     "@runapi/gateways",
@@ -27,8 +27,8 @@
     "url": "https://github.com/oycen/runapi/issues"
   },
   "dependencies": {
-    "@runapi/requestor": "^10.7.3",
-    "@runapi/decorators": "^10.7.3",
+    "@runapi/decorators": "^11.0.0",
+    "@runapi/requestor": "^11.0.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
