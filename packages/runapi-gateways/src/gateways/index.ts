@@ -11,7 +11,7 @@ export class Gateways {
   configuration: { requestContext?: requestor.RequestContext | undefined } = {};
   services: Record<string, requestor.Requestor> = {};
 
-  load(url: string) {
+  static load(url: string) {
     const createScript = (src: string) => {
       const script = document.createElement("script");
       script.setAttribute("type", "text/javascript");
@@ -35,7 +35,7 @@ export class Gateways {
     this.configuration = configuration;
   }
 
-  register(name: string, requestor: requestor.Requestor) {
+  inject(name: string, requestor: requestor.Requestor) {
     if (this.configuration.requestContext) {
       requestor.requestContext = requestor.requestContext.merge(this.configuration.requestContext);
     }
