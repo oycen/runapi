@@ -6,7 +6,7 @@ export function createGateways() {
 }
 
 export class Gateways {
-  globalRequestContext: RequestContext | undefined;
+  configuration: { requestContext?: RequestContext | undefined } = {};
   services: Record<string, Requestor> = {};
 
   load(url: string) {
@@ -29,13 +29,13 @@ export class Gateways {
     });
   }
 
-  configure(requestContext: RequestContext) {
-    this.globalRequestContext = requestContext;
+  configure(configuration: Gateways["configuration"]) {
+    this.configuration = configuration;
   }
 
   register(name: string, requestor: Requestor) {
-    if (this.globalRequestContext) {
-      requestor.requestContext = requestor.requestContext.merge(this.globalRequestContext);
+    if (this.configuration.requestContext) {
+      requestor.requestContext = requestor.requestContext.merge(this.configuration.requestContext);
     }
 
     window.name = name;
