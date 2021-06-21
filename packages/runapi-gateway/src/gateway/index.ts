@@ -23,6 +23,6 @@ export class Gateway {
   }
 
   getServiceFactory() {
-    return (requestContext: RequestContextPlain) => Service(() => this.services[window.name], requestContext);
+    return (requestContext?: RequestContextPlain) => Service(() => this.services[window.name], requestContext);
   }
 }
