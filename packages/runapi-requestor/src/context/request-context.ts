@@ -1,4 +1,4 @@
-import { buildUrl, combinePath, combineUrl, compilePath, objectToQueryString } from "../helpers";
+import { buildUrl, combinePath, compilePath, objectToQueryString } from "../helpers";
 import { Requestor } from "../requestor";
 import { ResponseContext } from "./response-context";
 
@@ -22,7 +22,6 @@ export type ModelConstructor<T = any> = { new (...args: any[]): T };
 export function createRequestContext(requestContextPlain?: RequestContextPlain) {
   return new RequestContext()
     .setBaseUrl(requestContextPlain?.baseUrl)
-    .setBasePath(requestContextPlain?.basePath)
     .setPath(requestContextPlain?.path)
     .setMethod(requestContextPlain?.method ?? "GET")
     .setHeaders(requestContextPlain?.headers)
@@ -40,9 +39,6 @@ export function createRequestContext(requestContextPlain?: RequestContextPlain) 
 export interface RequestContextPlain {
   /** 请求基础URL */
   baseUrl?: string;
-
-  /** 请求基础路径 */
-  basePath?: string;
 
   /** 请求路径 */
   path?: string;
@@ -91,9 +87,6 @@ export class RequestContext {
   /** 请求基础URL */
   baseUrl?: string;
 
-  /** 请求基础路径 */
-  basePath?: string;
-
   /** 请求路径 */
   path?: string;
 
@@ -138,7 +131,7 @@ export class RequestContext {
 
   /** 请求完整路径 */
   get fullpath() {
-    return compilePath(combinePath(this.basePath ?? "", this.path ?? ""), this.params);
+    return compilePath(this.path ?? "", this.params);
   }
 
   /** 请求完整URL */
@@ -159,12 +152,6 @@ export class RequestContext {
   /** 设置请求基础URL */
   setBaseUrl(baseUrl: RequestContext["baseUrl"]) {
     this.baseUrl = baseUrl;
-    return this;
-  }
-
-  /** 设置请求基础路径 */
-  setBasePath(basePath: RequestContext["basePath"]) {
-    this.basePath = basePath;
     return this;
   }
 
@@ -249,7 +236,6 @@ export class RequestContext {
   merge(source: RequestContext) {
     return new RequestContext()
       .setBaseUrl(source.baseUrl ?? this.baseUrl)
-      .setBasePath(combinePath(this.basePath ?? "", source.basePath ?? ""))
       .setPath(combinePath(this.path ?? "", source.path ?? ""))
       .setMethod(source.method ?? this.method)
       .setHeaders(Object.assign({}, this.headers, source.headers))
