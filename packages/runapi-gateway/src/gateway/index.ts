@@ -1,4 +1,4 @@
-import { RequestContext, Requestor } from "@runapi/requestor";
+import { RequestContext, RequestContextPlain, Requestor } from "@runapi/requestor";
 import { Service } from "@runapi/decorators";
 
 export class Gateway {
@@ -20,5 +20,9 @@ export class Gateway {
 
   getService() {
     return Service(() => this.services[window.name]);
+  }
+
+  getServiceFactory() {
+    return (requestContext: RequestContextPlain) => Service(() => this.services[window.name], requestContext);
   }
 }
