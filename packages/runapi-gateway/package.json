@@ -1,11 +1,11 @@
 {
-  "name": "@runapi/gateways",
+  "name": "@runapi/gateway",
   "version": "11.1.0",
-  "description": "@runapi/gateways",
+  "description": "@runapi/gateway",
   "keywords": [
-    "@runapi/gateways",
+    "@runapi/gateway",
     "runapi",
-    "gateways"
+    "gateway"
   ],
   "author": "oycen<oycen@sina.com>",
   "homepage": "https://github.com/oycen/runapi#readme",

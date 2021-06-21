@@ -138,7 +138,7 @@ export class RequestContext {
 
   /** 请求完整路径 */
   get fullpath() {
-    return compilePath(combineUrl(this.basePath ?? "", this.path ?? ""), this.params);
+    return compilePath(combinePath(this.basePath ?? "", this.path ?? ""), this.params);
   }
 
   /** 请求完整URL */
@@ -250,7 +250,7 @@ export class RequestContext {
     return new RequestContext()
       .setBaseUrl(source.baseUrl ?? this.baseUrl)
       .setBasePath(combinePath(this.basePath ?? "", source.basePath ?? ""))
-      .setPath(source.path ?? this.path)
+      .setPath(combinePath(this.path ?? "", source.path ?? ""))
       .setMethod(source.method ?? this.method)
       .setHeaders(Object.assign({}, this.headers, source.headers))
       .setCredentials(source.credentials ?? this.credentials)

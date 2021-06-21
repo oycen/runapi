@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { ENV_CACHE_KEY } from ".";
+import { REQUEST_ENV_CACHE_KEY } from ".";
 
 export default {
   props: {
@@ -100,7 +100,7 @@ export default {
     },
     handleSwitch(env) {
       this.requestor.switch(env);
-      window && window.localStorage.setItem(ENV_CACHE_KEY, env);
+      window && window.localStorage.setItem(REQUEST_ENV_CACHE_KEY, env);
       this.$emit("switch", env);
 
       this.showFabs = false;

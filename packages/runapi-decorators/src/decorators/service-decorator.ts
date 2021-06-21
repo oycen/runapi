@@ -1,19 +1,21 @@
-import { Requestor, createRequestor } from "@runapi/requestor";
+import { Requestor, createRequestor, RequestContextPlain, RequestContext, createRequestContext } from "@runapi/requestor";
 
 export const serviceMetadataKey = Symbol("service");
 
-export function Service(requestor: Requestor): ClassDecorator;
-export function Service(requestor: () => Requestor): ClassDecorator;
+export function Service(requestor: Requestor, requestContextPlain?: RequestContextPlain): ClassDecorator;
+export function Service(requestor: () => Requestor, requestContextPlain?: RequestContextPlain): ClassDecorator;
 export function Service(...args: Parameters<typeof createRequestor>): ClassDecorator;
 
-export function Service(...args: [Requestor] | [() => Requestor] | Parameters<typeof createRequestor>): ClassDecorator {
-  let request: Requestor | (() => Requestor) | undefined;
+export function Service(...args: any): ClassDecorator {
+  let requestor: Requestor | (() => Requestor) | undefined;
+  let requestContext: RequestContext | undefined;
   if (typeof args[0] === "function" || args[0] instanceof Requestor) {
-    request = args[0];
+    requestor = args[0];
+    requestContext = createRequestContext(args[1]);
   } else {
-    request = new Requestor(args[0], args[1], args[2]);
+    requestor = new Requestor(args[0], args[1], args[2]);
   }
   return (target) => {
-    Reflect.defineMetadata(serviceMetadataKey, request, target.prototype);
+    Reflect.defineMetadata(serviceMetadataKey, { requestor, requestContext }, target.prototype);
   };
 }

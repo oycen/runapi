@@ -20,8 +20,8 @@ export function combineUrl(baseUrl: string, relativeUrl: string) {
   return relativeUrl ? baseUrl.replace(/\/+$/, "") + "/" + relativeUrl.replace(/^\/+/, "") : baseUrl;
 }
 
-export function combinePath(basePath: string, relativePath: string) {
-  return relativePath.indexOf("/") === 0 ? relativePath : combineUrl(basePath, relativePath);
+export function combinePath(basePath: string, path: string) {
+  return path.indexOf("/") === 0 ? path : combineUrl(basePath, path);
 }
 
 export function buildUrl(baseUrl: string, relativeUrl: string) {

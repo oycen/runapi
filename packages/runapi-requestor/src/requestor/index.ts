@@ -89,7 +89,7 @@ export class Requestor<Response = any, Environment extends string = any> {
 
     if (requestContext) this.requestContext = this.requestContext.merge(requestContext);
 
-    if (Requestor.client === "browser") this.switch(window.localStorage.getItem("REQUESTOR_ENV") as Environment);
+    if (Requestor.client === "browser") this.switch(window.localStorage.getItem("request_env") as Environment);
   }
 
   /** 发起请求 */

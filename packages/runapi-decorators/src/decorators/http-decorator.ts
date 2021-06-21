@@ -42,9 +42,15 @@ export function Http(
     );
 
     descriptor.value = function () {
-      const serviceMetadata = Reflect.getMetadata(serviceMetadataKey, target) as Requestor | (() => Requestor) | undefined;
-      const requestor = typeof serviceMetadata === "function" ? serviceMetadata() : serviceMetadata;
+      const serviceMetadata = Reflect.getMetadata(serviceMetadataKey, target) as
+        | {
+            requestor: Requestor | (() => Requestor) | undefined;
+            requestContext: RequestContext | undefined;
+          }
+        | undefined;
+      if (!serviceMetadata) return;
 
+      const requestor = typeof serviceMetadata.requestor === "function" ? serviceMetadata.requestor() : serviceMetadata.requestor;
       if (!requestor) return;
 
       const params = arguments[paramsArgIndex];
@@ -56,6 +62,7 @@ export function Http(
 
         try {
           responseContext = await requestor.requestContext
+            .merge(serviceMetadata.requestContext ?? createRequestContext())
             .merge(
               createRequestContext()
                 .setBaseUrl(baseUrl)
