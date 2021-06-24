@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "ts-node ./server/bootstrap.ts",
-    "resolve": "ts-node ./resolve/index.ts",
+    "resolve": "ts-node ./resolve/resolver.ts",
     "build": "tsc",
     "clean": "rimraf lib"
   },
