@@ -1,0 +1,43 @@
+{
+  "name": "@runapi/docs",
+  "private": "true",
+  "version": "12.2.0",
+  "description": "@runapi/docs",
+  "keywords": [
+    "@runapi/docs",
+    "runapi",
+    "docs"
+  ],
+  "author": "oycen<oycen@sina.com>",
+  "homepage": "https://github.com/oycen/runapi#readme",
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oycen/runapi.git"
+  },
+  "scripts": {
+    "start": "ts-node ./server/bootstrap.ts",
+    "resolve": "ts-node ./resolve/index.ts",
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "bugs": {
+    "url": "https://github.com/oycen/runapi/issues"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.14.7",
+    "@babel/traverse": "^7.14.7",
+    "fastify": "^3.18.0"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.2.3"
+  },
+  "gitHead": "cc0dd1374d1eb34e238de348c86ec4c10ba4d7b2"
+}
