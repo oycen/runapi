@@ -9,6 +9,7 @@ export * from "./decorators/headers-decorator";
 export * from "./decorators/params-decorator";
 export * from "./decorators/query-decorator";
 export * from "./decorators/body-decorator";
+export * from "./decorators/formdata-decorator";
 export * from "./decorators/http-decorator";
 export * from "./decorators/get-decorator";
 export * from "./decorators/post-decorator";
