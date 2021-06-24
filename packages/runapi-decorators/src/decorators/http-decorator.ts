@@ -5,6 +5,7 @@ import { headersMetadataKey } from "./headers-decorator";
 import { paramsMetadataKey } from "./params-decorator";
 import { queryMetadataKey } from "./query-decorator";
 import { bodyMetadataKey } from "./body-decorator";
+import { formdataMetadataKey } from "./formdata-decorator";
 import { mockMetadataKey } from "./mock-decorator";
 import { modelMetadataKey } from "./model-decorator";
 import { similarMetadataKey } from "./similar-decorator";
@@ -14,7 +15,7 @@ export function Http(
   path?: string,
   data?: { params?: RequestContext["params"]; query?: RequestContext["query"]; body?: RequestContext["body"] }
 ): MethodDecorator {
-  return function (target, propertyKey, descriptor: TypedPropertyDescriptor<any>) {
+  return function(target, propertyKey, descriptor: TypedPropertyDescriptor<any>) {
     const httpMetadataKey = `http:${target.constructor.name}:${propertyKey.toString()}`;
 
     const baseUrl = Reflect.getMetadata(baseUrlMetadataKey, target) as RequestContext["baseUrl"];
@@ -26,6 +27,7 @@ export function Http(
     const paramsArgIndex = Reflect.getMetadata(paramsMetadataKey, target);
     const queryArgIndex = Reflect.getMetadata(queryMetadataKey, target);
     const bodyArgIndex = Reflect.getMetadata(bodyMetadataKey, target);
+    const formdataArgIndex = Reflect.getMetadata(formdataMetadataKey, target);
 
     const designParamtypes = Reflect.getMetadata("design:paramtypes", target, propertyKey);
 
@@ -36,12 +38,12 @@ export function Http(
         headers: headers ?? {},
         params: designParamtypes[paramsArgIndex]?.name ?? {},
         query: designParamtypes[queryArgIndex]?.name ?? {},
-        body: designParamtypes[bodyArgIndex]?.name ?? {},
+        body: designParamtypes[bodyArgIndex]?.name ?? {}
       },
       target
     );
 
-    descriptor.value = function () {
+    descriptor.value = function() {
       const serviceMetadata = Reflect.getMetadata(serviceMetadataKey, target) as
         | {
             requestor: Requestor | (() => Requestor) | undefined;
@@ -56,6 +58,7 @@ export function Http(
       const params = arguments[paramsArgIndex];
       const query = arguments[queryArgIndex];
       const body = arguments[bodyArgIndex];
+      const formdata = arguments[formdataArgIndex];
 
       return new Promise(async (resolve, reject) => {
         let responseContext;
@@ -72,6 +75,7 @@ export function Http(
                 .setParams(Object.assign({}, data?.params ?? {}, params))
                 .setQuery(Object.assign({}, data?.query ?? {}, query))
                 .setBody(Object.assign({}, data?.body ?? {}, body))
+                .setFormData(formdata)
                 .setMock(mock)
                 .setModel(model)
                 .setSimilar(similar)

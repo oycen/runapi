@@ -29,6 +29,7 @@ export function createRequestContext(requestContextPlain?: RequestContextPlain) 
     .setParams(requestContextPlain?.params)
     .setQuery(requestContextPlain?.query)
     .setBody(requestContextPlain?.body)
+    .setFormData(requestContextPlain?.formData)
     .setMock(requestContextPlain?.mock)
     .setModel(requestContextPlain?.model)
     .setSimilar(requestContextPlain?.similar)
@@ -63,6 +64,9 @@ export interface RequestContextPlain {
 
   /** 请求体参数 */
   body?: Record<string, any>;
+
+  /** 表单参数 */
+  formData?: FormData;
 
   /**
    * 模拟数据模板
@@ -110,6 +114,9 @@ export class RequestContext {
 
   /** 请求体参数 */
   body?: Record<string, any>;
+
+  /** 表单参数 */
+  formData?: FormData;
 
   /**
    * 模拟数据模板
@@ -197,6 +204,12 @@ export class RequestContext {
     return this;
   }
 
+  /** 设置表单参数 */
+  setFormData(formData: RequestContext["formData"]) {
+    this.formData = formData;
+    return this;
+  }
+
   /** 设置模拟数据模板 */
   setMock(mock: RequestContext["mock"]) {
     this.mock = mock;
@@ -243,6 +256,7 @@ export class RequestContext {
       .setParams(Object.assign({}, this.params, source.params))
       .setQuery(Object.assign({}, this.query, source.query))
       .setBody(Object.assign({}, this.body, source.body))
+      .setFormData(source.formData ?? this.formData)
       .setMock(source.mock ?? this.mock)
       .setModel(source.model ?? this.model)
       .setSimilar(source.similar ?? this.similar)
