@@ -1,0 +1,27 @@
+{
+  "name": "Api",
+  "description": "Api Docs",
+  "services": [
+    {
+      "filename": "auth.service.ts",
+      "filepath": "/Users/ouyangcheng/Workspace/github/runapi/packages/runapi-docs/test-file/src/auth-server/auth.service.ts",
+      "name": "AuthService",
+      "summary": "鉴权服务",
+      "description": "鉴权服务相关接口",
+      "apis": [
+        {
+          "name": "login",
+          "summary": "用户登录，用户密码验证登录或手机号验证登录",
+          "description": null,
+          "method": "Post",
+          "path": "/auth/login_by_password",
+          "headers": "",
+          "params": "",
+          "query": "",
+          "body": "",
+          "response": ""
+        }
+      ]
+    }
+  ]
+}

@@ -5,15 +5,14 @@ import { QueryModel } from "./query-model";
 import { ResponseModel } from "./response-model";
 
 export interface ApiModel {
-  [key: string]: any;
-  name: string;
-  summary: string;
-  description: string;
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  path: string;
-  headers: HeadersModel;
-  params: ParamsModel;
-  query: QueryModel;
-  body: BodyModel;
-  response: ResponseModel;
+  name: string | null;
+  summary: string | null;
+  description: string | null;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | null;
+  path: string | null;
+  headers: HeadersModel | null;
+  params: ParamsModel | null;
+  query: QueryModel | null;
+  body: BodyModel | null;
+  response: ResponseModel | null;
 }

@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "module": "CommonJS",
-    "outDir": "lib",
     "strict": true,
-    "declaration": true,
     "baseUrl": ".",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ESNext"]
   },
-  "include": ["src/**/*"]
+  "include": ["resolve/**/*", "server/**/*"]
 }

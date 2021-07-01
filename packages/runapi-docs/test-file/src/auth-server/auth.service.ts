@@ -4,6 +4,10 @@ import { Result } from "../baibu-api-result";
 import { PwdLoginBody, SmsLoginBody } from "./login/login.req";
 import { LoginResult } from "./login/login.res";
 
+/**
+ * @summary 鉴权服务
+ * @description 鉴权服务相关接口
+ */
 @BBService()
 class AuthService {
   /** 用户登录，用户密码验证登录或手机号验证登录 */
