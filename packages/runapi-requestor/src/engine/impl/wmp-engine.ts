@@ -1,7 +1,7 @@
 import { Engine, EngineAbortPromise } from "..";
 import { RequestContext } from "../../context/request-context";
 
-export interface WxmpResponse {
+export interface WechatMiniProgramResponse {
   cookies: string[];
   data: any;
   header: Record<string, any>;
@@ -10,11 +10,11 @@ export interface WxmpResponse {
   errMsg: string;
 }
 
-export class WxmpEngine extends Engine<WxmpResponse> {
+export class WechatMiniProgramEngine extends Engine<WechatMiniProgramResponse> {
   doRequest({ url, method, headers, body, others }: RequestContext) {
     let abort = () => {};
 
-    return new EngineAbortPromise<WxmpResponse>((resolve, reject) => {
+    return new EngineAbortPromise<WechatMiniProgramResponse>((resolve, reject) => {
       if (method === "PATCH") throw new Error("请求方法'PATCH'不受支持");
 
       const request = wx.request({
@@ -25,13 +25,13 @@ export class WxmpEngine extends Engine<WxmpResponse> {
         dataType: "json",
         success: resolve,
         fail: reject,
-        ...others,
+        ...others
       });
       abort = request.abort;
     }, abort);
   }
 
-  async doResponse(response: WxmpResponse) {
+  async doResponse(response: WechatMiniProgramResponse) {
     const ok = 200 <= response.statusCode && response.statusCode <= 299;
     return { ok, status: response.statusCode, statusText: response.errMsg, result: response.data };
   }
