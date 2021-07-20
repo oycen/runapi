@@ -18,8 +18,6 @@ export class EngineAbortPromise<T> {
 }
 
 export abstract class Engine<Response = any> {
-  static EngineAbortPromise = EngineAbortPromise;
-
   abstract doRequest(requestContext: RequestContext): Promise<Response> | EngineAbortPromise<Response>;
 
   abstract doResponse(

@@ -1,4 +1,4 @@
-import { buildUrl, combinePath, compilePath, objectToQueryString } from "../helpers";
+import { buildUrl, combinePath, compilePath, objectToQueryString } from "../utils";
 import { Requestor } from "../requestor";
 import { ResponseContext } from "./response-context";
 
@@ -8,84 +8,16 @@ export type RequestCredentials = "include" | "omit" | "same-origin" | boolean;
 export type Similar = "abort" | "wait-done";
 export type RequestSimilar = Similar | ((requestContext: RequestContext) => [string, Similar]);
 
-export type RequestContextTap<T> = (requestContext: RequestContext) => T;
-export type ResponseContextTap<T> = (responseContext: ResponseContext<any, any>) => T;
-export type ContextTap =
-  | RequestContextTap<void>
-  | RequestContextTap<ResponseContextTap<void>>
-  | RequestContextTap<ResponseContextTap<Promise<void>>>
-  | RequestContextTap<Promise<ResponseContextTap<void>>>
-  | RequestContextTap<Promise<ResponseContextTap<Promise<void>>>>;
+export type RequestAround<T> = (requestContext: RequestContext) => T;
+export type ResponseAround<T> = (responseContext: ResponseContext<any, any>) => T;
+export type Around =
+  | RequestAround<void>
+  | RequestAround<ResponseAround<void>>
+  | RequestAround<ResponseAround<Promise<void>>>
+  | RequestAround<Promise<ResponseAround<void>>>
+  | RequestAround<Promise<ResponseAround<Promise<void>>>>;
 
 export type ModelConstructor<T = any> = { new (...args: any[]): T };
-
-export function createRequestContext(requestContextPlain?: RequestContextPlain) {
-  return new RequestContext()
-    .setBaseUrl(requestContextPlain?.baseUrl)
-    .setPath(requestContextPlain?.path)
-    .setMethod(requestContextPlain?.method ?? "GET")
-    .setHeaders(requestContextPlain?.headers)
-    .setCredentials(requestContextPlain?.credentials)
-    .setParams(requestContextPlain?.params)
-    .setQuery(requestContextPlain?.query)
-    .setBody(requestContextPlain?.body)
-    .setFormData(requestContextPlain?.formData)
-    .setMock(requestContextPlain?.mock)
-    .setModel(requestContextPlain?.model)
-    .setSimilar(requestContextPlain?.similar)
-    .setOthers(requestContextPlain?.others)
-    .setContextTap(requestContextPlain?.contextTap);
-}
-
-export interface RequestContextPlain {
-  /** 请求基础URL */
-  baseUrl?: string;
-
-  /** 请求路径 */
-  path?: string;
-
-  /** 请求方法 */
-  method?: RequestMethod;
-
-  /** 请求头 */
-  headers?: Record<string, string>;
-
-  /**
-   * 是否允许携带跨域cookies
-   * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Request/credentials
-   */
-  credentials?: RequestCredentials;
-
-  /** 请求路径参数 */
-  params?: Record<string, any>;
-
-  /** 请求查询参数 */
-  query?: Record<string, any>;
-
-  /** 请求体参数 */
-  body?: Record<string, any>;
-
-  /** 表单参数 */
-  formData?: FormData;
-
-  /**
-   * 模拟数据模板
-   * @see https://github.com/nuysoft/Mock/wiki/Mock.mock()
-   */
-  mock?: any;
-
-  /** 响应对象模型 */
-  model?: ModelConstructor;
-
-  /** 类似请求处理方式 */
-  similar?: RequestSimilar;
-
-  /** 需要传递给引擎的其他参数 */
-  others?: any;
-
-  /** 请求上下文与响应上下文监听回调函数 */
-  contextTap?: ContextTap;
-}
 
 export class RequestContext {
   /** 请求基础URL */
@@ -130,11 +62,11 @@ export class RequestContext {
   /** 类似请求处理方式 */
   similar?: RequestSimilar;
 
+  /** 请求上下文与响应上下文监听回调函数 */
+  around?: Around;
+
   /** 需要传递给引擎的其他参数 */
   others?: any;
-
-  /** 请求上下文与响应上下文监听回调函数 */
-  contextTap?: ContextTap;
 
   /** 请求完整路径 */
   get fullpath() {
@@ -154,6 +86,41 @@ export class RequestContext {
   /** 带查询字符串的请求完整URL */
   get queryUrl() {
     return `${this.url}${this.queryString}`;
+  }
+
+  constructor(
+    plain?: Pick<
+      RequestContext,
+      | "baseUrl"
+      | "path"
+      | "method"
+      | "headers"
+      | "credentials"
+      | "params"
+      | "query"
+      | "body"
+      | "formData"
+      | "mock"
+      | "model"
+      | "similar"
+      | "around"
+      | "others"
+    >
+  ) {
+    this.baseUrl = plain?.baseUrl;
+    this.path = plain?.path;
+    this.method = plain?.method ?? "GET";
+    this.headers = plain?.headers;
+    this.credentials = plain?.credentials;
+    this.params = plain?.params;
+    this.query = plain?.query;
+    this.body = plain?.body;
+    this.formData = plain?.formData;
+    this.mock = plain?.mock;
+    this.model = plain?.model;
+    this.similar = plain?.similar;
+    this.around = plain?.around;
+    this.others = plain?.others;
   }
 
   /** 设置请求基础URL */
@@ -228,15 +195,15 @@ export class RequestContext {
     return this;
   }
 
-  /** 设置需要传递给引擎的其他参数 */
-  setOthers(others: RequestContext["others"]) {
-    this.others = others;
+  /** 设置请求上下文与响应上下文监听 */
+  setAround(around: RequestContext["around"]) {
+    this.around = around;
     return this;
   }
 
-  /** 设置请求上下文与响应上下文监听 */
-  setContextTap(contextTap: RequestContext["contextTap"]) {
-    this.contextTap = contextTap;
+  /** 设置需要传递给引擎的其他参数 */
+  setOthers(others: RequestContext["others"]) {
+    this.others = others;
     return this;
   }
 
@@ -260,7 +227,7 @@ export class RequestContext {
       .setMock(source.mock ?? this.mock)
       .setModel(source.model ?? this.model)
       .setSimilar(source.similar ?? this.similar)
-      .setOthers(source.others ?? this.others)
-      .setContextTap(source.contextTap ?? this.contextTap);
+      .setAround(source.around ?? this.around)
+      .setOthers(source.others ?? this.others);
   }
 }

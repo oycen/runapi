@@ -9,7 +9,7 @@
     "clean": "yarn workspaces run clean",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "postinstall": "npx husky install && npx husky add .husky/pre-commit 'npx lint-staged' && npx husky add .husky/commit-msg 'npx commitlint --edit \"$1\"'"
+    "prepare": "npx husky install"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
